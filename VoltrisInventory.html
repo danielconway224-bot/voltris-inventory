@@ -24,11 +24,9 @@ a{color:var(--blue);text-decoration:none}
 
 /* SIDEBAR */
 .sidebar{width:236px;background:linear-gradient(180deg,#161a22,#0c0f15);color:#a3adbf;display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid #1f2430}
-.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#f43f5e,#b0102f);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(225,29,72,.3)}
-.logo svg{width:20px;height:20px}
-.brand h1{font-size:16px;color:#fff;font-weight:700;letter-spacing:.2px}
-.brand span{font-size:10px;color:#7d8797;letter-spacing:2px;text-transform:uppercase;display:block}
+.brand{display:flex;align-items:center;padding:21px 18px 17px;border-bottom:1px solid rgba(255,255,255,.07)}
+.brand h1{font-size:19px;color:#fff;font-weight:800;letter-spacing:-.3px}
+.brand h1 span{color:#f43f5e}
 .nav{flex:1;overflow-y:auto;padding:10px 10px}
 .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:#5f6b7d;padding:14px 10px 6px}
 .nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#aeb6c6;font-weight:500;margin-bottom:2px;transition:.15s;position:relative}
@@ -198,8 +196,7 @@ tbody tr:last-child td{border-bottom:none}
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4.5 13.5H11L10 22l9-12H12.5L13 2z" fill="#fff"/></svg></div>
-      <div><h1>Voltris</h1><span>Inventory</span></div>
+      <h1>Voltris<span>Inventory</span></h1>
     </div>
     <nav class="nav" id="nav">
       <div class="nav-label">Overview</div>
