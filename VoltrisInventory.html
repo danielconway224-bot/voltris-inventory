@@ -276,40 +276,126 @@ function seedVendors(){return[
 ];}
 
 function seedProducts(){
-  const raw=[
-    // name, sku, category, qty, uom, price, cost, reorderPt, reorderQty, vendor
-    ['Whole Milk - 1 Gal','GRO-1001','Dairy & Eggs',42,'GAL',4.29,2.60,20,60,'V1'],
-    ['Large Eggs - Dozen','GRO-1002','Dairy & Eggs',8,'DOZ',3.79,2.10,24,72,'V1'],
-    ['White Bread Loaf','GRO-1003','Bakery',15,'EA',2.99,1.30,20,50,'V2'],
-    ['Bananas','GRO-1004','Produce',210,'LB',0.59,0.28,50,150,'V3'],
-    ['Gala Apples','GRO-1005','Produce',96,'LB',1.49,0.75,40,120,'V3'],
-    ['Boneless Chicken Breast','GRO-1006','Meat & Seafood',34,'LB',3.99,2.40,25,80,'V1'],
-    ['Ground Beef 80/20','GRO-1007','Meat & Seafood',18,'LB',5.49,3.60,20,60,'V1'],
-    ['Orange Juice - 64oz','GRO-1008','Beverages',27,'EA',4.99,2.80,20,60,'V2'],
-    ['Ground Coffee - 12oz','GRO-1009','Beverages',52,'EA',8.99,5.20,20,48,'V2'],
-    ['Corn Flakes Cereal','GRO-1010','Pantry',40,'BOX',3.49,1.80,25,60,'V2'],
-    ['Spaghetti Pasta - 1lb','GRO-1011','Pantry',120,'EA',1.29,0.55,40,120,'V2'],
-    ['White Rice - 5lb Bag','GRO-1012','Pantry',33,'BAG',6.49,3.40,20,50,'V2'],
-    ['Roma Tomatoes','GRO-1013','Produce',12,'LB',1.79,0.90,30,90,'V3'],
-    ['Iceberg Lettuce','GRO-1014','Produce',44,'EA',1.99,0.95,25,75,'V3'],
-    ['Cheddar Cheese Block','GRO-1015','Dairy & Eggs',29,'EA',5.99,3.40,20,50,'V1'],
-    ['Greek Yogurt - 32oz','GRO-1016','Dairy & Eggs',6,'EA',5.49,3.10,18,48,'V1'],
-    ['Butter - 1lb','GRO-1017','Dairy & Eggs',38,'EA',4.79,2.70,20,50,'V1'],
-    ['Cola - 12 Pack','GRO-1018','Beverages',61,'PACK',6.99,4.10,24,72,'V2'],
-    ['Potato Chips - Family Size','GRO-1019','Snacks',73,'BAG',4.29,2.20,30,80,'V2'],
-    ['Frozen Cheese Pizza','GRO-1020','Frozen',20,'EA',5.99,3.30,18,45,'V1'],
-    ['Vanilla Ice Cream - 1.5qt','GRO-1021','Frozen',3,'EA',5.49,3.00,15,40,'V1'],
-    ['Paper Towels - 6 Roll','GRO-1022','Household',48,'PACK',9.99,5.80,20,50,'V2'],
-    ['Atlantic Salmon Fillet','GRO-1023','Meat & Seafood',9,'LB',11.99,7.50,15,40,'V4'],
-    ['Dish Soap - 24oz','GRO-1024','Household',55,'EA',3.49,1.70,20,50,'V2'],
-    ['Strawberries - 1lb','GRO-1025','Produce',14,'EA',3.99,2.10,20,60,'V3'],
-    ['Sliced Turkey - Deli','GRO-1026','Deli',22,'LB',7.99,4.60,18,45,'V1'],
+  // [category, vendorId, costFactor, items:[name, uom, price]]
+  const CATALOG=[
+  ['Produce','V3',.48,[
+    ['Bananas','LB',0.59],['Gala Apples','LB',1.49],['Fuji Apples','LB',1.59],['Granny Smith Apples','LB',1.49],['Honeycrisp Apples','LB',2.49],
+    ['Navel Oranges','LB',1.29],['Mandarin Oranges - 3lb Bag','BAG',4.99],['Red Seedless Grapes','LB',2.79],['Green Seedless Grapes','LB',2.59],
+    ['Strawberries - 1lb','EA',3.99],['Blueberries - Pint','EA',4.49],['Raspberries - 6oz','EA',3.99],['Blackberries - 6oz','EA',3.49],
+    ['Watermelon - Whole','EA',5.99],['Cantaloupe','EA',3.49],['Honeydew Melon','EA',3.99],['Pineapple','EA',3.49],['Mango','EA',1.49],
+    ['Hass Avocado','EA',1.79],['Lemons','EA',0.69],['Limes','EA',0.49],['Peaches','LB',2.29],['Nectarines','LB',2.49],['Black Plums','LB',2.29],
+    ['Bartlett Pears','LB',1.89],['Kiwi Fruit','EA',0.79],['Iceberg Lettuce','EA',1.99],['Romaine Hearts - 3ct','PACK',3.99],
+    ['Baby Spinach - 5oz','EA',2.99],['Spring Mix - 5oz','EA',3.49],['Kale - Bunch','EA',2.49],['Broccoli Crowns','LB',2.29],
+    ['Cauliflower Head','EA',3.49],['Carrots - 2lb Bag','BAG',2.29],['Baby Carrots - 1lb','BAG',1.99],['Celery Stalk','EA',2.19],
+    ['Cucumbers','EA',0.89],['Zucchini','LB',1.79],['Yellow Squash','LB',1.79],['Green Bell Pepper','EA',0.99],['Red Bell Pepper','EA',1.49],
+    ['Roma Tomatoes','LB',1.79],['Vine-Ripened Tomatoes','LB',2.49],['Cherry Tomatoes - Pint','EA',3.29],['Yellow Onions - 3lb Bag','BAG',3.29],
+    ['Red Onions','LB',1.29],['Sweet Potatoes','LB',1.19],['Russet Potatoes - 5lb Bag','BAG',4.49],['Red Potatoes - 5lb Bag','BAG',4.99],
+    ['Garlic - 3ct','PACK',1.99],['Fresh Ginger','LB',3.99],['White Mushrooms - 8oz','EA',2.49],['Portobello Caps - 6oz','EA',3.49],
+    ['Green Onions - Bunch','EA',1.19],['Cilantro - Bunch','EA',0.99],['Parsley - Bunch','EA',1.29],['Asparagus','LB',3.99],
+    ['Green Beans','LB',2.49],['Corn on the Cob - 4ct','PACK',3.49],['Jalapeno Peppers','LB',1.99]]],
+  ['Dairy & Eggs','V1',.58,[
+    ['Whole Milk - 1 Gal','GAL',4.29],['2% Reduced Fat Milk - 1 Gal','GAL',4.19],['Skim Milk - 1 Gal','GAL',3.99],['Whole Milk - Half Gallon','EA',2.79],
+    ['Chocolate Milk - Half Gallon','EA',3.29],['Oat Milk - 64oz','EA',4.99],['Almond Milk - 64oz','EA',3.99],['Soy Milk - 64oz','EA',3.79],
+    ['Heavy Whipping Cream - Pint','EA',4.49],['Half & Half - Quart','EA',3.99],['Large Eggs - Dozen','DOZ',3.79],['Large Eggs - 18ct','PACK',5.49],
+    ['Organic Eggs - Dozen','DOZ',6.49],['Liquid Egg Whites - 16oz','EA',3.99],['Butter - 1lb','EA',4.79],['Unsalted Butter - 1lb','EA',4.79],
+    ['Margarine Spread - 15oz','EA',2.99],['Cheddar Cheese Block','EA',5.99],['Mozzarella Block - 16oz','EA',5.49],['Shredded Cheddar - 8oz','EA',3.29],
+    ['Shredded Mozzarella - 8oz','EA',3.29],['Shredded Mexican Blend - 8oz','EA',3.49],['String Cheese - 12ct','PACK',4.99],
+    ['American Singles - 24ct','PACK',4.49],['Cream Cheese - 8oz','EA',2.79],['Parmesan Wedge - 8oz','EA',6.99],['Swiss Cheese - Sliced 8oz','EA',4.49],
+    ['Greek Yogurt - 32oz','EA',5.49],['Greek Yogurt Cups - 4pk','PACK',4.29],['Vanilla Yogurt - 32oz','EA',3.99],['Sour Cream - 16oz','EA',2.49],
+    ['Cottage Cheese - 24oz','EA',4.29],['Whipped Topping - 13oz','EA',3.49]]],
+  ['Meat & Seafood','V1',.62,[
+    ['Boneless Chicken Breast','LB',3.99],['Chicken Thighs - Bone-In','LB',2.49],['Chicken Drumsticks','LB',1.99],['Whole Chicken','LB',1.79],
+    ['Chicken Wings','LB',3.49],['Ground Turkey - 1lb','EA',4.99],['Turkey Breast Cutlets','LB',5.49],['Ground Beef 80/20','LB',5.49],
+    ['Ground Beef 90/10','LB',6.49],['Ribeye Steak','LB',14.99],['New York Strip Steak','LB',12.99],['Top Sirloin Steak','LB',9.99],
+    ['Beef Chuck Roast','LB',7.49],['Beef Stew Meat','LB',7.99],['Pork Chops - Center Cut','LB',4.49],['Pork Tenderloin','LB',4.99],
+    ['Pork Shoulder Roast','LB',2.99],['Baby Back Ribs','LB',5.99],['Bacon - 16oz','EA',6.49],['Breakfast Sausage Links - 12oz','EA',4.29],
+    ['Italian Sausage - 19oz','EA',5.99],['Beef Hot Dogs - 8ct','PACK',4.99]]],
+  ['Meat & Seafood','V4',.65,[
+    ['Atlantic Salmon Fillet','LB',11.99],['Tilapia Fillets','LB',7.99],['Cod Fillets','LB',9.99],['Raw Shrimp 31/40 - 1lb','BAG',8.99],
+    ['Sea Scallops','LB',19.99],['Lump Crab Meat - 8oz','EA',12.99],['Ahi Tuna Steaks','LB',13.99],['Catfish Fillets','LB',8.49],
+    ['Mahi Mahi Fillets','LB',12.49],['Snow Crab Legs','LB',14.99]]],
+  ['Bakery','V2',.45,[
+    ['White Bread Loaf','EA',2.99],['Wheat Bread Loaf','EA',3.29],['Sourdough Loaf','EA',4.49],['Multigrain Bread','EA',3.99],['Rye Bread','EA',3.79],
+    ['French Baguette','EA',2.99],['Hamburger Buns - 8ct','PACK',2.99],['Hot Dog Buns - 8ct','PACK',2.79],['Brioche Buns - 4ct','PACK',3.99],
+    ['Flour Tortillas - 10ct','PACK',3.29],['Corn Tortillas - 30ct','PACK',3.49],['Plain Bagels - 6ct','PACK',3.99],['English Muffins - 6ct','PACK',3.49],
+    ['Butter Croissants - 4ct','PACK',4.99],['Dinner Rolls - 12ct','PACK',3.99],['Pita Bread - 6ct','PACK',2.99],['Naan Bread - 2ct','PACK',3.49],
+    ['Blueberry Muffins - 4ct','PACK',4.99],['Apple Pie - 8 inch','EA',6.99],['Chocolate Chip Cookies - 12ct','PACK',4.49]]],
+  ['Frozen','V1',.55,[
+    ['Frozen Cheese Pizza','EA',5.99],['Frozen Pepperoni Pizza','EA',6.49],['Frozen Supreme Pizza','EA',6.99],['Vanilla Ice Cream - 1.5qt','EA',5.49],
+    ['Chocolate Ice Cream - 1.5qt','EA',5.49],['Strawberry Ice Cream - 1.5qt','EA',5.49],['Ice Cream Sandwiches - 6ct','PACK',4.99],
+    ['Frozen Broccoli Florets - 12oz','EA',1.99],['Frozen Sweet Corn - 12oz','EA',1.79],['Frozen Green Peas - 12oz','EA',1.79],
+    ['Frozen Mixed Vegetables - 12oz','EA',1.99],['Frozen Chopped Spinach - 10oz','EA',1.69],['Frozen French Fries - 32oz','BAG',3.99],
+    ['Frozen Tater Tots - 32oz','BAG',4.29],['Frozen Onion Rings - 16oz','BAG',3.79],['Frozen Chicken Nuggets - 2lb','BAG',7.99],
+    ['Frozen Chicken Tenders - 25oz','BAG',7.49],['Frozen Fish Sticks - 24ct','BOX',5.99],['Frozen Waffles - 10ct','BOX',3.29],
+    ['Frozen Pancakes - 12ct','BOX',3.49],['Frozen Breakfast Burritos - 8ct','BOX',6.99],['Frozen Lasagna - Family Size','EA',9.99],
+    ['Frozen Chicken Pot Pies - 2ct','BOX',4.99],['Frozen Strawberries - 16oz','BAG',3.49],['Frozen Blueberries - 16oz','BAG',3.99],
+    ['Frozen Mango Chunks - 16oz','BAG',3.79],['Frozen Garlic Bread - 16oz','EA',3.29]]],
+  ['Beverages','V2',.58,[
+    ['Orange Juice - 64oz','EA',4.99],['Apple Juice - 64oz','EA',3.49],['Cranberry Juice - 64oz','EA',3.99],['Grape Juice - 64oz','EA',3.79],
+    ['Lemonade - 64oz','EA',2.99],['Fruit Punch - 1 Gal','GAL',3.49],['Ground Coffee - 12oz','EA',8.99],['Whole Bean Coffee - 12oz','EA',9.99],
+    ['Decaf Ground Coffee - 12oz','EA',8.99],['Coffee Pods - 24ct','BOX',14.99],['Black Tea Bags - 100ct','BOX',4.99],['Green Tea Bags - 40ct','BOX',3.99],
+    ['Cola - 12 Pack','PACK',6.99],['Diet Cola - 12 Pack','PACK',6.99],['Lemon-Lime Soda - 12 Pack','PACK',6.79],['Root Beer - 12 Pack','PACK',6.79],
+    ['Ginger Ale - 12 Pack','PACK',6.49],['Sparkling Water - 12 Pack','PACK',5.49],['Spring Water - 24 Pack','PACK',4.99],['Distilled Water - 1 Gal','GAL',1.49],
+    ['Sports Drink - 8 Pack','PACK',7.99],['Energy Drink - 4 Pack','PACK',8.99],['Iced Tea - 1 Gal','GAL',2.99],['Coconut Water - 33oz','EA',4.49],
+    ['Hot Cocoa Mix - 10ct','BOX',3.49],['Cold Brew Concentrate - 32oz','EA',9.99]]],
+  ['Pantry','V2',.52,[
+    ['Corn Flakes Cereal','BOX',3.49],['Honey Nut O\'s Cereal','BOX',4.29],['Raisin Bran Cereal','BOX',4.49],['Instant Oatmeal Packets - 10ct','BOX',3.99],
+    ['Old Fashioned Oats - 42oz','EA',5.49],['Granola - 12oz','BAG',4.99],['Spaghetti Pasta - 1lb','EA',1.29],['Penne Pasta - 1lb','EA',1.29],
+    ['Rotini Pasta - 1lb','EA',1.29],['Elbow Macaroni - 1lb','EA',1.29],['Lasagna Noodles - 16oz','BOX',2.49],['Egg Noodles - 12oz','BAG',2.29],
+    ['White Rice - 5lb Bag','BAG',6.49],['Brown Rice - 2lb Bag','BAG',3.49],['Jasmine Rice - 5lb Bag','BAG',8.99],['Quinoa - 16oz','BAG',5.99],
+    ['Marinara Sauce - 24oz','EA',2.99],['Alfredo Sauce - 15oz','EA',3.49],['Salsa - 16oz','EA',3.29],['Tomato Paste - 6oz','EA',0.99],
+    ['Diced Tomatoes - 14.5oz','EA',1.29],['Tomato Sauce - 15oz','EA',1.19],['Chicken Broth - 32oz','EA',2.49],['Beef Broth - 32oz','EA',2.49],
+    ['Chicken Noodle Soup - 10.75oz','EA',1.49],['Tomato Soup - 10.75oz','EA',1.29],['Black Beans - 15oz','EA',1.09],['Pinto Beans - 15oz','EA',1.09],
+    ['Kidney Beans - 15oz','EA',1.19],['Garbanzo Beans - 15oz','EA',1.19],['Refried Beans - 16oz','EA',1.49],['Sweet Corn Can - 15oz','EA',1.09],
+    ['Green Beans Can - 14.5oz','EA',1.09],['Chunk Light Tuna - 5oz','EA',1.29],['Canned Chicken Breast - 12.5oz','EA',3.49],
+    ['Peanut Butter - 16oz','EA',3.29],['Grape Jelly - 18oz','EA',2.99],['Strawberry Jam - 18oz','EA',3.29],['Honey - 12oz','EA',4.49],
+    ['Maple Syrup - 12oz','EA',5.99],['Pancake Mix - 32oz','BOX',3.49],['All-Purpose Flour - 5lb','BAG',3.99],['Granulated Sugar - 4lb','BAG',3.79],
+    ['Brown Sugar - 2lb','BAG',2.79],['Powdered Sugar - 2lb','BAG',2.79],['Baking Soda - 1lb','BOX',1.29],['Baking Powder - 8oz','EA',2.49],
+    ['Vanilla Extract - 2oz','EA',4.99],['Vegetable Oil - 48oz','EA',4.49],['Olive Oil - 25oz','EA',8.99],['Canola Oil - 48oz','EA',4.99],
+    ['Ketchup - 32oz','EA',3.49],['Yellow Mustard - 14oz','EA',1.99],['Mayonnaise - 30oz','EA',4.99],['BBQ Sauce - 18oz','EA',2.49],
+    ['Hot Sauce - 5oz','EA',1.99],['Soy Sauce - 15oz','EA',2.99],['Ranch Dressing - 16oz','EA',3.49],['Italian Dressing - 16oz','EA',2.99],
+    ['White Vinegar - 32oz','EA',1.99],['Apple Cider Vinegar - 16oz','EA',2.49],['Table Salt - 26oz','EA',0.99],['Ground Black Pepper - 4oz','EA',3.99],
+    ['Garlic Powder - 5oz','EA',2.99],['Onion Powder - 5oz','EA',2.79],['Chili Powder - 4oz','EA',2.99],['Ground Cinnamon - 4oz','EA',2.99],
+    ['Taco Seasoning - 1oz','EA',0.79],['Mac & Cheese Dinner','BOX',1.29],['Instant Mashed Potatoes - 13oz','BOX',2.49],['Stuffing Mix - 6oz','BOX',1.99],
+    ['Brownie Mix - 18oz','BOX',2.29],['Yellow Cake Mix - 15oz','BOX',1.99],['Chocolate Chips - 12oz','BAG',3.49]]],
+  ['Snacks','V2',.5,[
+    ['Potato Chips - Family Size','BAG',4.29],['BBQ Potato Chips','BAG',4.29],['Sour Cream & Onion Chips','BAG',4.29],['Tortilla Chips - 13oz','BAG',3.99],
+    ['Nacho Cheese Chips','BAG',4.49],['Corn Chips - 9.25oz','BAG',3.79],['Pretzels - 16oz','BAG',3.29],['Cheese Puffs - 8.5oz','BAG',3.99],
+    ['Microwave Popcorn - 6ct','BOX',4.49],['Popcorn Kernels - 32oz','BAG',3.49],['Saltine Crackers - 16oz','BOX',2.99],['Butter Crackers - 13.7oz','BOX',3.49],
+    ['Cheese Crackers - 12.4oz','BOX',3.99],['Graham Crackers - 14.4oz','BOX',3.79],['Rice Cakes - 8.5oz','BAG',2.99],['Granola Bars - 12ct','BOX',4.99],
+    ['Protein Bars - 6ct','BOX',7.99],['Fruit Snacks - 22ct','BOX',5.49],['Trail Mix - 26oz','BAG',8.99],['Mixed Nuts - 16oz','EA',8.49],
+    ['Roasted Almonds - 16oz','BAG',7.99],['Cashews - 16oz','EA',9.49],['Roasted Peanuts - 16oz','EA',3.99],['Sunflower Seeds - 5.25oz','BAG',1.99],
+    ['Beef Jerky - 10oz','BAG',11.99],['Sandwich Cookies - 20ct','PACK',3.99],['Vanilla Wafers - 11oz','BOX',3.29],['Milk Chocolate Bars - 6pk','PACK',5.99],
+    ['Gummy Bears - 12oz','BAG',2.99],['Hard Candy Mix - 14oz','BAG',3.49]]],
+  ['Household','V2',.58,[
+    ['Paper Towels - 6 Roll','PACK',9.99],['Toilet Paper - 12 Roll','PACK',11.99],['Facial Tissues - 3pk','PACK',5.49],['Napkins - 250ct','PACK',3.99],
+    ['Paper Plates - 100ct','PACK',6.99],['Plastic Cups - 50ct','PACK',4.49],['Plastic Utensils - 48ct','PACK',3.49],['Aluminum Foil - 75ft','EA',4.99],
+    ['Plastic Wrap - 100ft','EA',3.49],['Parchment Paper - 45ft','EA',3.99],['Sandwich Bags - 100ct','BOX',3.29],['Freezer Bags Gallon - 30ct','BOX',4.49],
+    ['Trash Bags 13 Gal - 45ct','BOX',8.99],['Trash Bags 30 Gal - 28ct','BOX',9.49],['Dish Soap - 24oz','EA',3.49],['Dishwasher Pods - 32ct','BAG',8.99],
+    ['Laundry Detergent - 100oz','EA',12.99],['Fabric Softener - 64oz','EA',5.99],['Dryer Sheets - 120ct','BOX',4.99],['Bleach - 64oz','EA',3.29],
+    ['All-Purpose Cleaner - 32oz','EA',3.49],['Glass Cleaner - 32oz','EA',3.29],['Disinfecting Wipes - 75ct','EA',4.99],['Scrub Sponges - 6pk','PACK',3.99],
+    ['Hand Soap Refill - 56oz','EA',6.49],['Air Freshener Spray - 8.8oz','EA',3.49]]],
+  ['Deli','V1',.6,[
+    ['Sliced Turkey - Deli','LB',7.99],['Sliced Ham - Deli','LB',6.99],['Sliced Roast Beef - Deli','LB',9.99],['Sliced Pastrami - Deli','LB',9.49],
+    ['Genoa Salami - Deli','LB',8.99],['Sliced Pepperoni - 6oz','EA',3.99],['Provolone - Deli Sliced','LB',7.49],['Muenster - Deli Sliced','LB',7.29],
+    ['Rotisserie Chicken','EA',7.99],['Potato Salad - 1lb','EA',4.49],['Macaroni Salad - 1lb','EA',4.29],['Coleslaw - 1lb','EA',3.99],
+    ['Chicken Salad - 1lb','EA',6.99],['Egg Salad - 1lb','EA',4.99],['Hummus - 10oz','EA',3.99],['Fresh Mozzarella Ball - 8oz','EA',5.49]]],
   ];
-  return raw.map((r,i)=>({
-    id:'P'+(i+1),name:r[0],sku:r[1],barcode:'07300650'+(10000+i),category:r[2],
-    qty:r[3],uom:r[4],price:r[5],cost:r[6],reorderPoint:r[7],reorderQty:r[8],
-    vendorId:r[9],method:'Purchase',location:LOCS[i%4]
-  }));
+  const out=[];let i=0;
+  CATALOG.forEach(g=>{const cat=g[0],vid=g[1],cf=g[2];g[3].forEach(it=>{
+    // deterministic pseudo-random stock levels so ~12% of items sit below par
+    const h=Math.imul(i+1,2654435761)>>>0;
+    const rp=10+(h%8)*5;
+    const rq=Math.max(rp,Math.round(rp*2.4/5)*5);
+    let qty=rp+6+((h>>>3)%(rp*2));
+    if(i%8===5)qty=Math.max(1,rp-1-((h>>>5)%rp));
+    if(i%40===21)qty=0;
+    out.push({id:'P'+(i+1),name:it[0],sku:'GRO-'+(1001+i),barcode:'07300650'+(10000+i),category:cat,
+      qty,uom:it[1],price:it[2],cost:Math.max(.05,Math.round(it[2]*cf*100)/100),reorderPoint:rp,reorderQty:rq,
+      vendorId:vid,method:'Purchase',location:LOCS[i%4]});
+    i++;
+  });});
+  return out;
 }
 
 function seedSales(){return[
@@ -331,7 +417,7 @@ function seedPOs(){return[
 /* ============ STATE ============ */
 let DB=load();
 function load(){
-  try{const s=JSON.parse(localStorage.getItem('voltris_v2'));if(s&&s.products)return s;}catch(e){}
+  try{const s=JSON.parse(localStorage.getItem('voltris_v3'));if(s&&s.products)return s;}catch(e){}
   return{products:seedProducts(),vendors:seedVendors(),sales:seedSales(),pos:seedPOs(),
     transfers:[{id:'ST-000012',from:'Distribution Center',to:'Main Store',status:'Open',date:'Jul 6, 2026'},
                {id:'ST-000010',from:'Backroom',to:'Cold Storage',status:'In Transit',date:'Jul 5, 2026'}],
@@ -341,7 +427,7 @@ function load(){
     integrations:{pos:true,scanner:true,distributor:true,shopify:false,quickbooks:false,shipstation:false},
     poSeq:23,soSeq:23,activity:[]};
 }
-function save(){localStorage.setItem('voltris_v2',JSON.stringify(DB));}
+function save(){localStorage.setItem('voltris_v3',JSON.stringify(DB));}
 function logAct(t){DB.activity.unshift({t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});DB.activity=DB.activity.slice(0,30);}
 
 /* ============ HELPERS ============ */
