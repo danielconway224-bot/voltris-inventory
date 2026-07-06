@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltris Inventory</title>
+<style>
+:root{
+  --navy:#0a0608; --navy2:#140b0f; --navy3:#1e1116;
+  --blue:#e11d48; --blue2:#f43f5e; --blue-soft:#2a1016; --blue-glow:rgba(225,29,72,.4);
+  --ink:#f5f2f3; --muted:#8f8288; --line:#2a2028; --bg:#0a0709; --white:#141014;
+  --card2:#100c10; --hover:#1b141a;
+  --green:#34d399; --green-soft:#0f2a20; --amber:#fbbf24; --amber-soft:#2c2110;
+  --red:#f43f5e; --red-soft:#2e1017; --purple:#c084fc;
+  --shadow:0 1px 3px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:14px}
+input,select{font-family:inherit;font-size:14px}
+a{color:var(--blue);text-decoration:none}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:236px;background:linear-gradient(180deg,#0c0507,#050203);color:#cbbcc2;display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid #241318}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#f43f5e,#b0102f);display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px var(--blue-glow)}
+.logo svg{width:20px;height:20px}
+.brand h1{font-size:16px;color:#fff;font-weight:700;letter-spacing:.2px}
+.brand span{font-size:10px;color:#6f86a8;letter-spacing:2px;text-transform:uppercase;display:block}
+.nav{flex:1;overflow-y:auto;padding:10px 10px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:#54688a;padding:14px 10px 6px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#b4c4dc;font-weight:500;margin-bottom:2px;transition:.15s;position:relative}
+.nav a svg{width:18px;height:18px;flex-shrink:0;opacity:.85}
+.nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav a.active{background:linear-gradient(90deg,#e11d48,#9f1239);color:#fff;box-shadow:0 4px 14px var(--blue-glow)}
+.nav a.active svg{opacity:1}
+.nav a .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px}
+.sidefoot{padding:12px 16px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#5f7599}
+.sidefoot b{color:#9fb4d4}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:60px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:16px;flex-shrink:0}
+.topbar h2{font-size:18px;font-weight:700}
+.topbar .sub{color:var(--muted);font-size:12px}
+.top-search{margin-left:auto;position:relative}
+.top-search input{width:240px;padding:8px 12px 8px 32px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+.top-search svg{width:15px;height:15px;position:absolute;left:10px;top:9px;color:var(--muted)}
+.top-btn{background:var(--blue);color:#fff;padding:8px 15px;border-radius:9px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px var(--blue-glow)}
+.top-btn.ghost{background:var(--white);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.top-btn svg{width:15px;height:15px}
+.content{flex:1;overflow-y:auto;padding:22px}
+
+/* CARDS / TABLES */
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.card-h{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.card-h h3{font-size:15px;font-weight:700}
+.card-h .spacer{flex:1}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:11px 18px;border-bottom:1px solid var(--line);font-weight:600}
+td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{transition:.12s}
+tbody tr:hover{background:var(--hover)}
+tbody tr:last-child td{border-bottom:none}
+.prod-cell{display:flex;align-items:center;gap:11px}
+.thumb{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.prod-cell b{display:block;font-weight:600}
+.prod-cell small{color:var(--muted);font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--blue-soft);color:#fb7185}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.p-green{background:var(--green-soft);color:var(--green)}
+.p-amber{background:var(--amber-soft);color:var(--amber)}
+.p-red{background:var(--red-soft);color:var(--red)}
+.p-blue{background:var(--blue-soft);color:#fb7185}
+.p-gray{background:#eef1f6;color:#64748b}
+.qty{font-weight:700;font-size:15px}
+.qty small{font-weight:500;color:var(--muted);font-size:11px}
+.right{text-align:right}
+.btn{padding:7px 13px;border-radius:8px;font-weight:600;border:1px solid var(--line);background:var(--white)}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.pri{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 3px 10px var(--blue-glow)}
+.btn.pri:hover{background:#be123c;color:#fff}
+.btn.warn{background:var(--amber);color:#fff;border-color:var(--amber)}
+.btn.warn:hover{color:#fff}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn.danger{color:var(--red);border-color:#5a1f2a}
+.btn.danger:hover{background:var(--red);color:#fff}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat .ic svg{width:20px;height:20px}
+.stat .v{font-size:26px;font-weight:800;line-height:1}
+.stat .l{color:var(--muted);font-size:12px;margin-top:4px}
+.stat .d{font-size:11px;font-weight:600;margin-top:8px}
+.ic-blue{background:var(--blue-soft);color:var(--blue)}
+.ic-green{background:var(--green-soft);color:var(--green)}
+.ic-amber{background:var(--amber-soft);color:var(--amber)}
+.ic-red{background:var(--red-soft);color:var(--red)}
+.ic-purple{background:#2a1533;color:var(--purple)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.toolbar .search{position:relative;flex:1;max-width:340px}
+.toolbar .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:10px;background:var(--white)}
+.toolbar .search svg{width:15px;height:15px;position:absolute;left:11px;top:10px;color:var(--muted)}
+.filter{padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--white);font-weight:500;display:flex;align-items:center;gap:7px;color:#334}
+.filter select{border:none;background:none;font-weight:600;outline:none}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(11,24,48,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:540px;max-height:88vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:pop .18s ease}
+.modal.wide{max-width:760px}
+@keyframes pop{from{transform:scale(.96) translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal-h{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.modal-h h3{font-size:17px;font-weight:700}
+.modal-h .x{margin-left:auto;width:30px;height:30px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted)}
+.modal-b{padding:22px}
+.modal-f{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:var(--card2);border-radius:0 0 16px 16px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:#455;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-glow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* DETAIL LAYOUT */
+.detail{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border:none}
+.kv span{color:var(--muted)}
+.kv b{font-weight:600}
+
+/* AUTO-REORDER PANEL */
+.reorder-banner{background:linear-gradient(100deg,#2c2110,#1a140a);border:1px solid #4a3814;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.reorder-banner .rb-ic{width:42px;height:42px;border-radius:11px;background:var(--amber);color:#1a1206;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reorder-banner b{font-size:15px}
+.reorder-banner p{color:#c9a45a;font-size:12px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;margin-bottom:18px;width:fit-content}
+.tabs button{padding:7px 16px;border-radius:8px;font-weight:600;color:var(--muted)}
+.tabs button.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow)}
+
+/* INTEGRATIONS */
+.int-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.int-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.int-card .ih{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.int-card .il{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg)}
+.int-card h4{font-size:15px;font-weight:700}
+.int-card p{color:var(--muted);font-size:12.5px;line-height:1.5;margin-bottom:14px}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{display:none}
+.switch .track{position:absolute;inset:0;background:#cbd5e1;border-radius:20px;transition:.2s}
+.switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch input:checked+.track{background:var(--green)}
+.switch input:checked+.track .knob{transform:translateX(20px)}
+
+/* SCANNER */
+.scanner{max-width:520px;margin:0 auto}
+.scan-box{background:var(--navy);border-radius:16px;padding:26px;text-align:center;color:#fff;margin-bottom:18px;position:relative;overflow:hidden}
+.scan-box::before{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue2),transparent);top:50%;animation:scanline 2s linear infinite;box-shadow:0 0 12px var(--blue2)}
+@keyframes scanline{0%{top:20%}50%{top:80%}100%{top:20%}}
+.scan-box svg{width:52px;height:52px;opacity:.8;position:relative}
+.scan-input{display:flex;gap:10px;margin-bottom:18px}
+.scan-input input{flex:1;padding:13px 16px;border:2px solid var(--blue);border-radius:11px;font-size:16px;font-family:ui-monospace,monospace;letter-spacing:1px}
+.scan-log{max-height:280px;overflow:auto}
+.scan-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:var(--white)}
+.scan-item .si-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty svg{width:60px;height:60px;opacity:.35;margin-bottom:14px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:13px 18px;border-radius:11px;box-shadow:0 12px 40px rgba(0,0,0,.35);display:flex;align-items:center;gap:11px;z-index:200;transform:translateY(120px);opacity:0;transition:.3s;max-width:360px}
+.toast.show{transform:none;opacity:1}
+.toast .t-ic{width:26px;height:26px;border-radius:7px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast.warn .t-ic{background:var(--amber)}
+.bar-track{height:7px;background:#eef1f6;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px}
+.mini-note{font-size:11px;color:var(--muted);margin-top:3px}
+.hidden{display:none!important}
+.link{color:var(--blue);font-weight:600;cursor:pointer}
+.sample-banner{background:var(--blue-soft);color:#fb7185;text-align:center;padding:7px;font-size:12.5px;font-weight:500;border-bottom:1px solid var(--line)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.detail,.two-col{grid-template-columns:1fr}.sidebar{width:64px}.brand h1,.brand span,.nav a span,.nav-label,.sidefoot{display:none}.nav a{justify-content:center}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4.5 13.5H11L10 22l9-12H12.5L13 2z" fill="#fff"/></svg></div>
+      <div><h1>Voltris</h1><span>Inventory</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">Overview</div>
+      <a data-view="dashboard" data-ico="grid" class="active"><span>Dashboard</span></a>
+      <a data-view="products" data-ico="box"><span>Products</span><span class="badge" id="nav-low">0</span></a>
+      <a data-view="reorder" data-ico="refresh"><span>Auto-Reorder</span></a>
+      <div class="nav-label">Sales &amp; Purchasing</div>
+      <a data-view="sales" data-ico="cart"><span>Sales Orders</span></a>
+      <a data-view="purchase" data-ico="receipt"><span>Purchase Orders</span></a>
+      <a data-view="vendors" data-ico="truck"><span>Vendors</span></a>
+      <div class="nav-label">Operations</div>
+      <a data-view="scan" data-ico="scan"><span>Scan Station</span></a>
+      <a data-view="transfers" data-ico="swap"><span>Stock Transfers</span></a>
+      <a data-view="adjust" data-ico="edit"><span>Adjustments</span></a>
+      <a data-view="counts" data-ico="clipboard"><span>Stock Counts</span></a>
+      <div class="nav-label">System</div>
+      <a data-view="reports" data-ico="chart"><span>Reports</span></a>
+      <a data-view="integrations" data-ico="plug"><span>Integrations</span></a>
+    </nav>
+    <div class="sidefoot">Signed in as<br><b>info@voltrisai.com</b></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="page-title">Dashboard</h2>
+        <div class="sub" id="page-sub">Live overview of your inventory</div>
+      </div>
+      <div class="top-search" data-ico="search"><input id="globalSearch" placeholder="Search products, orders, vendors..."></div>
+      <button class="top-btn" id="quickAdd"><span data-ico="plus"></span> New</button>
+    </div>
+    <div class="sample-banner">⚡ Voltris Inventory — front-end prototype. Data is stored locally in your browser. Backend, distributor APIs & POS webhooks configurable later.</div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"><div id="modalHost"></div></div>
+<div class="toast" id="toast"><div class="t-ic"></div><div id="toastMsg"></div></div>
+
+<script>
+/* ============ ICONS ============ */
+function icon(n){
+  const p={
+    grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+    refresh:'<path d="M21 12a9 9 0 11-3-6.7M21 4v5h-5"/>',
+    cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1.5 1.5 0 001.5 1.2h8.8a1.5 1.5 0 001.5-1.1L22 7H6"/>',
+    receipt:'<path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3l-2.5 1.5L14 3l-2 1.5L10 3 7.5 4.5 5 3z"/><path d="M9 8h6M9 12h6"/>',
+    truck:'<path d="M1 3h13v11H1zM14 7h4l3 3v4h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/>',
+    scan:'<path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M6 12h12"/>',
+    swap:'<path d="M7 4l-4 4 4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+    edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+    clipboard:'<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 12l2 2 4-4"/>',
+    chart:'<path d="M3 3v18h18M8 16v-5M13 16V8M18 16v-9"/>',
+    plug:'<path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 01-12 0V8zM12 17v5"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    check:'<path d="M20 6L9 17l-5-5"/>',
+    warn:'<path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.4 3.9a2 2 0 00-3.4 0z"/>',
+    dollar:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+    trend:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>',
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
+}
+
+/* ============ SEED DATA ============ */
+const CATS=['Produce','Dairy & Eggs','Meat & Seafood','Bakery','Frozen','Beverages','Pantry','Snacks','Household','Deli'];
+const LOCS=['Main Store','Backroom','Cold Storage','Freezer','Distribution Center'];
+
+function seedVendors(){return[
+  {id:'V1',name:'Sysco Foods',contact:'Thelma R Coutu',email:'orders@sysco.com',phone:'111-222-3333',terms:'Net 30',lead:2,balance:13622.15,api:true},
+  {id:'V2',name:'US Foods',contact:'Raymond M Stang',email:'sales@usfoods.com',phone:'222-333-4455',terms:'Net 15',lead:3,balance:2140.00,api:true},
+  {id:'V3',name:'Fresh Valley Produce',contact:'Frederica Blunk',email:'ap@freshvalley.com',phone:'333-444-5566',terms:'Net 7',lead:1,balance:880.50,api:true},
+  {id:'V4',name:'Coastal Seafood Co.',contact:'Earleen Mai',email:'orders@coastalseafood.com',phone:'444-555-6677',terms:'Net 15',lead:2,balance:0,api:false},
+];}
+
+function seedProducts(){
+  const raw=[
+    // name, sku, category, qty, uom, price, cost, reorderPt, reorderQty, vendor, emoji
+    ['Whole Milk - 1 Gal','GRO-1001','Dairy & Eggs',42,'GAL',4.29,2.60,20,60,'V1','🥛'],
+    ['Large Eggs - Dozen','GRO-1002','Dairy & Eggs',8,'DOZ',3.79,2.10,24,72,'V1','🥚'],
+    ['White Bread Loaf','GRO-1003','Bakery',15,'EA',2.99,1.30,20,50,'V2','🍞'],
+    ['Bananas','GRO-1004','Produce',210,'LB',0.59,0.28,50,150,'V3','🍌'],
+    ['Gala Apples','GRO-1005','Produce',96,'LB',1.49,0.75,40,120,'V3','🍎'],
+    ['Boneless Chicken Breast','GRO-1006','Meat & Seafood',34,'LB',3.99,2.40,25,80,'V1','🍗'],
+    ['Ground Beef 80/20','GRO-1007','Meat & Seafood',18,'LB',5.49,3.60,20,60,'V1','🥩'],
+    ['Orange Juice - 64oz','GRO-1008','Beverages',27,'EA',4.99,2.80,20,60,'V2','🧃'],
+    ['Ground Coffee - 12oz','GRO-1009','Beverages',52,'EA',8.99,5.20,20,48,'V2','☕'],
+    ['Corn Flakes Cereal','GRO-1010','Pantry',40,'BOX',3.49,1.80,25,60,'V2','🥣'],
+    ['Spaghetti Pasta - 1lb','GRO-1011','Pantry',120,'EA',1.29,0.55,40,120,'V2','🍝'],
+    ['White Rice - 5lb Bag','GRO-1012','Pantry',33,'BAG',6.49,3.40,20,50,'V2','🍚'],
+    ['Roma Tomatoes','GRO-1013','Produce',12,'LB',1.79,0.90,30,90,'V3','🍅'],
+    ['Iceberg Lettuce','GRO-1014','Produce',44,'EA',1.99,0.95,25,75,'V3','🥬'],
+    ['Cheddar Cheese Block','GRO-1015','Dairy & Eggs',29,'EA',5.99,3.40,20,50,'V1','🧀'],
+    ['Greek Yogurt - 32oz','GRO-1016','Dairy & Eggs',6,'EA',5.49,3.10,18,48,'V1','🍶'],
+    ['Butter - 1lb','GRO-1017','Dairy & Eggs',38,'EA',4.79,2.70,20,50,'V1','🧈'],
+    ['Cola - 12 Pack','GRO-1018','Beverages',61,'PACK',6.99,4.10,24,72,'V2','🥤'],
+    ['Potato Chips - Family Size','GRO-1019','Snacks',73,'BAG',4.29,2.20,30,80,'V2','🍟'],
+    ['Frozen Cheese Pizza','GRO-1020','Frozen',20,'EA',5.99,3.30,18,45,'V1','🍕'],
+    ['Vanilla Ice Cream - 1.5qt','GRO-1021','Frozen',3,'EA',5.49,3.00,15,40,'V1','🍨'],
+    ['Paper Towels - 6 Roll','GRO-1022','Household',48,'PACK',9.99,5.80,20,50,'V2','🧻'],
+    ['Atlantic Salmon Fillet','GRO-1023','Meat & Seafood',9,'LB',11.99,7.50,15,40,'V4','🐟'],
+    ['Dish Soap - 24oz','GRO-1024','Household',55,'EA',3.49,1.70,20,50,'V2','🧼'],
+    ['Strawberries - 1lb','GRO-1025','Produce',14,'EA',3.99,2.10,20,60,'V3','🍓'],
+    ['Sliced Turkey - Deli','GRO-1026','Deli',22,'LB',7.99,4.60,18,45,'V1','🦃'],
+  ];
+  return raw.map((r,i)=>({
+    id:'P'+(i+1),name:r[0],sku:r[1],barcode:'07300650'+(10000+i),category:r[2],
+    qty:r[3],uom:r[4],price:r[5],cost:r[6],reorderPoint:r[7],reorderQty:r[8],
+    vendorId:r[9],method:'Purchase',location:LOCS[i%4],emoji:r[10]
+  }));
+}
+
+function seedSales(){return[
+  {id:'SO-000019',customer:'Corner Café (wholesale)',status:'Unfulfilled',total:187.47,date:'Jul 3, 2026',src:'Manual'},
+  {id:'SO-000020',customer:'POS Terminal #2',status:'Fulfilled',total:35.99,date:'Jul 4, 2026',src:'POS'},
+  {id:'SO-000013',customer:'Downtown Deli',status:'Started',total:119.99,date:'Jul 4, 2026',src:'Manual'},
+  {id:'SO-000016',customer:'POS Terminal #1',status:'Fulfilled',total:48.50,date:'Jul 5, 2026',src:'POS'},
+  {id:'SO-000021',customer:'Sunrise Catering',status:'Unfulfilled',total:265.99,date:'Jul 5, 2026',src:'Manual'},
+  {id:'SO-000022',customer:'POS Terminal #3',status:'Fulfilled',total:24.25,date:'Jul 6, 2026',src:'POS'},
+];}
+
+function seedPOs(){return[
+  {id:'PO-000005',vendorId:'V1',status:'Started',total:714.90,date:'Jun 25, 2026',lines:[],auto:false},
+  {id:'PO-000007',vendorId:'V2',status:'Unfulfilled',total:356.81,date:'Jun 28, 2026',lines:[],auto:false},
+  {id:'PO-000014',vendorId:'V1',status:'Started',total:2080.33,date:'Jul 1, 2026',lines:[],auto:false},
+  {id:'PO-000016',vendorId:'V4',status:'Unfulfilled',total:2964.55,date:'Jul 4, 2026',lines:[],auto:false},
+];}
+
+/* ============ STATE ============ */
+let DB=load();
+function load(){
+  try{const s=JSON.parse(localStorage.getItem('voltris_v2'));if(s&&s.products)return s;}catch(e){}
+  return{products:seedProducts(),vendors:seedVendors(),sales:seedSales(),pos:seedPOs(),
+    transfers:[{id:'ST-000012',from:'Distribution Center',to:'Main Store',status:'Open',date:'Jul 6, 2026'},
+               {id:'ST-000010',from:'Backroom',to:'Cold Storage',status:'In Transit',date:'Jul 5, 2026'}],
+    adjustments:[{id:'SA-000063',location:'Cold Storage',reason:'Spoilage',date:'Jul 6, 2026',qty:-3}],
+    counts:[{id:'SC-000006',location:'Main Store',status:'Open',items:7},
+            {id:'SC-000005',location:'Cold Storage',status:'Open',items:12}],
+    integrations:{pos:true,scanner:true,distributor:true,shopify:false,quickbooks:false,shipstation:false},
+    poSeq:23,soSeq:23,activity:[]};
+}
+function save(){localStorage.setItem('voltris_v2',JSON.stringify(DB));}
+function logAct(t){DB.activity.unshift({t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});DB.activity=DB.activity.slice(0,30);}
+
+/* ============ HELPERS ============ */
+const $=s=>document.querySelector(s);
+const money=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const vendorName=id=>{const v=DB.vendors.find(x=>x.id===id);return v?v.name:'—';};
+function stockState(p){
+  if(p.qty<=0)return{cls:'p-red',txt:'Out of stock',key:'out'};
+  if(p.qty<=p.reorderPoint)return{cls:'p-amber',txt:'Low stock',key:'low'};
+  if(p.qty<=p.reorderPoint*1.5)return{cls:'p-blue',txt:'Watch',key:'watch'};
+  return{cls:'p-green',txt:'In stock',key:'ok'};
+}
+function lowProducts(){return DB.products.filter(p=>p.qty<=p.reorderPoint);}
+function toast(msg,warn){const t=$('#toast');$('#toastMsg').textContent=msg;t.classList.toggle('warn',!!warn);t.querySelector('.t-ic').innerHTML=icon(warn?'warn':'check');t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),3200);}
+function openModal(html){$('#modalHost').innerHTML=html;$('#overlay').classList.add('show');}
+function closeModal(){$('#overlay').classList.remove('show');$('#modalHost').innerHTML='';}
+$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
+
+/* ============ ROUTER ============ */
+const TITLES={dashboard:['Dashboard','Live overview of your inventory'],products:['Products','Track stock, par levels & reorder points'],
+ reorder:['Auto-Reorder','Automatic purchasing when stock runs low'],sales:['Sales Orders','Orders from manual entry, POS & channels'],
+ purchase:['Purchase Orders','Orders sent to your distributors'],vendors:['Vendors','Distributors & suppliers'],
+ scan:['Scan Station','Barcode receiving, picking & counting'],transfers:['Stock Transfers','Move inventory between locations'],
+ adjust:['Stock Adjustments','Correct inventory quantities'],counts:['Stock Counts','Cycle & full inventory counts'],
+ reports:['Reports','Inventory movement & valuation'],integrations:['Integrations','POS, distributors, scanners & 3rd-party apps']};
+let currentView='dashboard';
+function go(view){
+  currentView=view;
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===view));
+  const t=TITLES[view]||['',''];$('#page-title').textContent=t[0];$('#page-sub').textContent=t[1];
+  ({dashboard:vDashboard,products:vProducts,reorder:vReorder,sales:vSales,purchase:vPurchase,vendors:vVendors,
+    scan:vScan,transfers:vTransfers,adjust:vAdjust,counts:vCounts,reports:vReports,integrations:vIntegrations}[view])();
+  updateNavBadge();
+}
+document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>go(a.dataset.view)));
+function updateNavBadge(){const n=lowProducts().length;const b=$('#nav-low');b.textContent=n;b.style.display=n?'inline-block':'none';}
+
+/* ============ DASHBOARD ============ */
+function vDashboard(){
+  const totalVal=DB.products.reduce((s,p)=>s+p.qty*p.cost,0);
+  const skuCount=DB.products.length;
+  const low=lowProducts();
+  const out=DB.products.filter(p=>p.qty<=0).length;
+  const openPO=DB.pos.filter(p=>p.status!=='Fulfilled').length;
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="stats">
+    <div class="stat"><div class="ic ic-blue">${icon('box')}</div><div class="v">${skuCount}</div><div class="l">Active SKUs</div><div class="d" style="color:var(--green)">${money(totalVal)} on-hand value</div></div>
+    <div class="stat"><div class="ic ic-amber">${icon('warn')}</div><div class="v">${low.length}</div><div class="l">Below reorder point</div><div class="d" style="color:var(--amber)">${out} out of stock</div></div>
+    <div class="stat"><div class="ic ic-green">${icon('cart')}</div><div class="v">${DB.sales.filter(s=>s.status!=='Fulfilled').length}</div><div class="l">Open sales orders</div><div class="d" style="color:var(--muted)">${DB.sales.filter(s=>s.src==='POS').length} from POS today</div></div>
+    <div class="stat"><div class="ic ic-purple">${icon('receipt')}</div><div class="v">${openPO}</div><div class="l">Open purchase orders</div><div class="d link" onclick="go('reorder')">Run auto-reorder →</div></div>
+  </div>
+
+  ${low.length?`<div class="reorder-banner">
+    <div class="rb-ic">${icon('refresh')}</div>
+    <div style="flex:1"><b>${low.length} product${low.length>1?'s are':' is'} below par level</b><p>Voltris can automatically generate purchase orders grouped by distributor and send them out.</p></div>
+    <button class="btn warn" onclick="go('reorder')">Review &amp; auto-order</button>
+  </div>`:''}
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-h"><h3>Low stock — needs attention</h3><div class="spacer"></div><span class="link" onclick="go('products')">View all</span></div>
+      <table><thead><tr><th>Product</th><th>On hand</th><th>Par</th><th>Status</th></tr></thead><tbody>
+      ${low.slice(0,7).map(p=>{const st=stockState(p);return `<tr onclick="productDetail('${p.id}')" style="cursor:pointer">
+        <td><div class="prod-cell"><div class="thumb">${p.emoji}</div><div><b>${p.name}</b><small>${p.sku}</small></div></div></td>
+        <td><span class="qty">${p.qty}</span> <small>${p.uom}</small></td><td>${p.reorderPoint}</td>
+        <td><span class="pill ${st.cls}">${st.txt}</span></td></tr>`;}).join('')||'<tr><td colspan="4" class="empty" style="padding:26px">All products above par 🎉</td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Recent activity</h3></div>
+      <div style="padding:8px 4px">
+      ${(DB.activity.length?DB.activity:[{t:'System ready — welcome to Voltris Inventory',time:'now'}]).slice(0,9).map(a=>`
+        <div style="display:flex;gap:11px;align-items:center;padding:9px 16px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
+          <div style="flex:1;font-size:13px">${a.t}</div><small style="color:var(--muted)">${a.time}</small>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============ PRODUCTS ============ */
+let prodFilter={q:'',cat:'',status:''};
+function vProducts(){
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="toolbar">
+    <div class="search">${icon('search')}<input id="pSearch" placeholder="Search products or SKU" value="${prodFilter.q}"></div>
+    <div class="filter">${icon('grid')}<select id="pCat"><option value="">All categories</option>${[...new Set(DB.products.map(p=>p.category))].map(x=>`<option ${prodFilter.cat===x?'selected':''}>${x}</option>`).join('')}</select></div>
+    <div class="filter">${icon('warn')}<select id="pStatus"><option value="">Any status</option><option value="low">Low / out</option><option value="ok">Healthy</option></select></div>
+    <div style="flex:1"></div>
+    <button class="btn" onclick="go('reorder')">${icon('refresh')} Auto-Reorder</button>
+    <button class="btn pri" onclick="newProduct()">${icon('plus')} New product</button>
+  </div>
+  <div class="card"><table><thead><tr>
+    <th>Product</th><th>Category</th><th>SKU</th><th>On hand</th><th>Par / Reorder</th><th>Status</th><th class="right">Price</th>
+  </tr></thead><tbody id="pBody"></tbody></table></div>`;
+  $('#pSearch').addEventListener('input',e=>{prodFilter.q=e.target.value;renderProducts();});
+  $('#pCat').addEventListener('change',e=>{prodFilter.cat=e.target.value;renderProducts();});
+  $('#pStatus').addEventListener('change',e=>{prodFilter.status=e.target.value;renderProducts();});
+  renderProducts();
+}
+function renderProducts(){
+  let list=DB.products.filter(p=>{
+    if(prodFilter.q&&!(p.name+p.sku+p.barcode).toLowerCase().includes(prodFilter.q.toLowerCase()))return false;
+    if(prodFilter.cat&&p.category!==prodFilter.cat)return false;
+    const st=stockState(p).key;
+    if(prodFilter.status==='low'&&!(st==='low'||st==='out'))return false;
+    if(prodFilter.status==='ok'&&(st==='low'||st==='out'))return false;
+    return true;
+  });
+  $('#pBody').innerHTML=list.map(p=>{const st=stockState(p);const pct=Math.min(100,Math.round(p.qty/(p.reorderQty+p.reorderPoint)*100));
+    return `<tr onclick="productDetail('${p.id}')" style="cursor:pointer">
+    <td><div class="prod-cell"><div class="thumb">${p.emoji}</div><div><b>${p.name}</b><small>${p.barcode}</small></div></div></td>
+    <td><span class="chip">${p.category}</span></td><td><small style="color:var(--muted)">${p.sku}</small></td>
+    <td><div class="qty">${p.qty} <small>${p.uom}</small></div><div class="bar-track" style="width:80px;margin-top:5px"><div class="bar-fill" style="width:${pct}%;background:${st.key==='ok'?'var(--green)':st.key==='out'?'var(--red)':'var(--amber)'}"></div></div></td>
+    <td>${p.reorderPoint} / +${p.reorderQty}<div class="mini-note">${p.method} · ${vendorName(p.vendorId)}</div></td>
+    <td><span class="pill ${st.cls}">${st.txt}</span></td>
+    <td class="right"><b>${money(p.price)}</b></td></tr>`;}).join('')||'<tr><td colspan="7" class="empty">No products match your filters</td></tr>';
+}
+
+function productDetail(id){
+  const p=DB.products.find(x=>x.id===id);if(!p)return;const st=stockState(p);
+  openModal(`<div class="modal wide">
+    <div class="modal-h"><div class="thumb" style="width:44px;height:44px;font-size:22px">${p.emoji}</div>
+      <div><h3>${p.name}</h3><div class="sub" style="color:var(--muted);font-size:12px">SKU ${p.sku} · ${p.barcode}</div></div>
+      <div class="x" onclick="closeModal()">×</div></div>
+    <div class="modal-b">
+      <div class="detail">
+        <div>
+          <div class="card" style="padding:16px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div><div style="font-size:32px;font-weight:800;line-height:1">${p.qty} <span style="font-size:14px;color:var(--muted)">${p.uom}</span></div><div style="color:var(--muted);font-size:12px">on hand · ${p.location}</div></div>
+              <span class="pill ${st.cls}" style="font-size:13px;padding:6px 14px">${st.txt}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.round(p.qty/(p.reorderQty+p.reorderPoint)*100))}%;background:${st.key==='ok'?'var(--green)':st.key==='out'?'var(--red)':'var(--amber)'}"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px"><span>Reorder at ${p.reorderPoint}</span><span>Target ${p.reorderPoint+p.reorderQty}</span></div>
+          </div>
+          <div class="card" style="padding:4px 16px">
+            <div class="kv"><span>Category</span><b>${p.category}</b></div>
+            <div class="kv"><span>Reorder point (par)</span><b>${p.reorderPoint} ${p.uom}</b></div>
+            <div class="kv"><span>Reorder quantity</span><b>+${p.reorderQty} ${p.uom}</b></div>
+            <div class="kv"><span>Replenish method</span><b>${p.method} order</b></div>
+            <div class="kv"><span>Preferred distributor</span><b>${vendorName(p.vendorId)}</b></div>
+            <div class="kv"><span>Unit cost</span><b>${money(p.cost)}</b></div>
+            <div class="kv"><span>Sell price</span><b>${money(p.price)}</b></div>
+          </div>
+        </div>
+        <div>
+          <div class="field"><label>On-hand quantity</label><input id="edQty" type="number" value="${p.qty}"></div>
+          <div class="grid2">
+            <div class="field"><label>Reorder point</label><input id="edRP" type="number" value="${p.reorderPoint}"></div>
+            <div class="field"><label>Reorder qty</label><input id="edRQ" type="number" value="${p.reorderQty}"></div>
+          </div>
+          <div class="field"><label>Method</label><select id="edMethod"><option ${p.method==='Purchase'?'selected':''}>Purchase</option><option ${p.method==='Manufacture'?'selected':''}>Manufacture</option><option ${p.method==='Transfer'?'selected':''}>Transfer</option></select></div>
+          <div class="field"><label>Preferred distributor</label><select id="edVendor">${DB.vendors.map(v=>`<option value="${v.id}" ${v.id===p.vendorId?'selected':''}>${v.name}</option>`).join('')}</select></div>
+          <div class="grid2">
+            <div class="field"><label>Unit cost</label><input id="edCost" type="number" step="0.01" value="${p.cost}"></div>
+            <div class="field"><label>Sell price</label><input id="edPrice" type="number" step="0.01" value="${p.price}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f">
+      ${p.qty<=p.reorderPoint?`<button class="btn warn" onclick="reorderOne('${p.id}')">${icon('refresh')} Order now from ${vendorName(p.vendorId)}</button>`:''}
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn pri" onclick="saveProduct('${p.id}')">Save changes</button>
+    </div></div>`);
+}
+function saveProduct(id){
+  const p=DB.products.find(x=>x.id===id);
+  p.qty=+$('#edQty').value;p.reorderPoint=+$('#edRP').value;p.reorderQty=+$('#edRQ').value;
+  p.method=$('#edMethod').value;p.vendorId=$('#edVendor').value;p.cost=+$('#edCost').value;p.price=+$('#edPrice').value;
+  logAct(`Updated product “${p.name}”`);save();closeModal();toast('Product saved');
+  if(currentView==='products')renderProducts();else go(currentView);updateNavBadge();
+}
+function newProduct(){
+  openModal(`<div class="modal">
+    <div class="modal-h"><h3>Create new product</h3><div class="x" onclick="closeModal()">×</div></div>
+    <div class="modal-b">
+      <div class="field"><label>Product name</label><input id="npName" placeholder="e.g. 18V Cordless Drill"></div>
+      <div class="grid2">
+        <div class="field"><label>SKU</label><input id="npSku" placeholder="Auto if blank"></div>
+        <div class="field"><label>Category</label><select id="npCat">${CATS.map(x=>`<option>${x}</option>`).join('')}</select></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>On hand</label><input id="npQty" type="number" value="0"></div>
+        <div class="field"><label>Reorder point</label><input id="npRP" type="number" value="10"></div>
+        <div class="field"><label>Reorder qty</label><input id="npRQ" type="number" value="25"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Distributor</label><select id="npVendor">${DB.vendors.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></div>
+        <div class="field"><label>Unit cost</label><input id="npCost" type="number" step="0.01" value="0"></div>
+      </div>
+    </div>
+    <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="createProduct()">Create product</button></div>
+  </div>`);
+}
+function createProduct(){
+  const name=$('#npName').value.trim();if(!name)return toast('Enter a product name',true);
+  const id='P'+Date.now();
+  DB.products.unshift({id,name,sku:$('#npSku').value||('3'+Math.floor(100000+Math.random()*900000)),
+    barcode:''+Math.floor(1e11+Math.random()*8e11),category:$('#npCat').value,qty:+$('#npQty').value,uom:'EA',
+    price:+$('#npCost').value*1.6||0,cost:+$('#npCost').value,reorderPoint:+$('#npRP').value,reorderQty:+$('#npRQ').value,
+    vendorId:$('#npVendor').value,method:'Purchase',location:'Eastern Warehouse',emoji:'📦'});
+  logAct(`Created product “${name}”`);save();closeModal();toast('Product created');go('products');
+}
+
+/* ============ AUTO-REORDER ============ */
+function vReorder(){
+  const low=lowProducts();
+  // group by vendor
+  const groups={};
+  low.forEach(p=>{(groups[p.vendorId]=groups[p.vendorId]||[]).push(p);});
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-h"><div class="thumb" style="background:var(--amber-soft);color:var(--amber)">${icon('refresh')}</div>
+      <div><h3>Par-based auto reorder</h3><div class="sub" style="color:var(--muted);font-size:12px">Voltris scans every SKU and drafts purchase orders for anything at or below its reorder point.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="go('products')">Adjust par levels</button>
+      ${low.length?`<button class="btn warn" onclick="runAutoReorder()">${icon('refresh')} Generate all POs (${low.length} items)</button>`:''}
+    </div>
+    <div style="padding:16px 18px;display:flex;gap:26px;flex-wrap:wrap">
+      <div><div style="font-size:22px;font-weight:800">${low.length}</div><div style="color:var(--muted);font-size:12px">items below par</div></div>
+      <div><div style="font-size:22px;font-weight:800">${Object.keys(groups).length}</div><div style="color:var(--muted);font-size:12px">distributors to order from</div></div>
+      <div><div style="font-size:22px;font-weight:800">${money(low.reduce((s,p)=>s+p.reorderQty*p.cost,0))}</div><div style="color:var(--muted);font-size:12px">estimated order value</div></div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px"><label class="switch"><input type="checkbox" ${DB.integrations.distributor?'checked':''} onchange="DB.integrations.distributor=this.checked;save()"><span class="track"><span class="knob"></span></span></label><div><b style="font-size:13px">Auto-send to distributor</b><div class="mini-note">Orders transmit via connected distributor API</div></div></div>
+    </div>
+  </div>`;
+  if(!low.length){c.innerHTML+=`<div class="card"><div class="empty">${icon('check')}<div style="font-size:16px;font-weight:600;color:var(--ink)">Everything is above par</div><div>No reorder needed right now. New low-stock items will appear here automatically.</div></div></div>`;return;}
+  Object.entries(groups).forEach(([vid,items])=>{
+    const v=DB.vendors.find(x=>x.id===vid);const total=items.reduce((s,p)=>s+p.reorderQty*p.cost,0);
+    c.innerHTML+=`<div class="card" style="margin-bottom:16px">
+      <div class="card-h"><div class="thumb" style="background:var(--blue-soft);color:var(--blue)">${icon('truck')}</div>
+        <div><h3>${v.name}</h3><div class="mini-note">${v.api?'🟢 API connected · lead time '+v.lead+' days':'✉️ Email PO · lead time '+v.lead+' days'} · ${v.terms}</div></div>
+        <div class="spacer"></div><b style="margin-right:12px">${money(total)}</b>
+        <button class="btn warn" onclick="runAutoReorder('${vid}')">Create &amp; ${v.api?'send':'email'} PO</button>
+      </div>
+      <table><thead><tr><th>Product</th><th>On hand</th><th>Par</th><th>Order qty</th><th class="right">Line cost</th></tr></thead><tbody>
+      ${items.map(p=>`<tr><td><div class="prod-cell"><div class="thumb">${p.emoji}</div><div><b>${p.name}</b><small>${p.sku}</small></div></div></td>
+        <td><span class="pill ${p.qty<=0?'p-red':'p-amber'}">${p.qty} ${p.uom}</span></td><td>${p.reorderPoint}</td>
+        <td><b>+${p.reorderQty}</b></td><td class="right">${money(p.reorderQty*p.cost)}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  });
+}
+function reorderOne(id){
+  const p=DB.products.find(x=>x.id===id);runAutoReorder(p.vendorId,[id]);closeModal();
+}
+function runAutoReorder(vendorId,onlyIds){
+  let low=lowProducts();
+  if(vendorId)low=low.filter(p=>p.vendorId===vendorId);
+  if(onlyIds)low=low.filter(p=>onlyIds.includes(p.id));
+  if(!low.length)return toast('Nothing to reorder',true);
+  const byVendor={};low.forEach(p=>{(byVendor[p.vendorId]=byVendor[p.vendorId]||[]).push(p);});
+  let created=0,sent=0;
+  Object.entries(byVendor).forEach(([vid,items])=>{
+    const v=DB.vendors.find(x=>x.id===vid);
+    const id='PO-'+String(DB.poSeq++).padStart(6,'0');
+    const lines=items.map(p=>({sku:p.sku,name:p.name,qty:p.reorderQty,cost:p.cost}));
+    const total=lines.reduce((s,l)=>s+l.qty*l.cost,0);
+    const willSend=DB.integrations.distributor&&v.api;
+    DB.pos.unshift({id,vendorId:vid,status:willSend?'Sent':'Unfulfilled',total,date:'Jul 6, 2026',lines,auto:true});
+    // simulate: incoming stock reserved — mark items as on order (bump reorder awareness). We won't add qty until "received".
+    created++;if(willSend)sent++;
+    logAct(`Auto-generated ${id} → ${v.name} (${items.length} items, ${money(total)})${willSend?' · sent via API':''}`);
+  });
+  save();
+  toast(`${created} PO${created>1?'s':''} created${sent?`, ${sent} sent to distributors`:''}`);
+  go('reorder');updateNavBadge();
+}
+
+/* ============ SALES ORDERS ============ */
+function vSales(){
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="toolbar">
+    <div class="search">${icon('search')}<input placeholder="Search orders" oninput="filterRows(this,'soRow')"></div>
+    <div style="flex:1"></div>
+    <button class="btn" onclick="simulatePOS()">${icon('scan')} Simulate POS sale</button>
+    <button class="btn pri" onclick="newSalesOrder()">${icon('plus')} New sales order</button>
+  </div>
+  <div class="reorder-banner" style="background:linear-gradient(100deg,#2a1016,#180a0e);border-color:#4a1622">
+    <div class="rb-ic" style="background:var(--blue);color:#fff">${icon('plug')}</div>
+    <div style="flex:1"><b style="color:var(--ink)">POS sync is ${DB.integrations.pos?'live':'off'}</b><p style="color:#d1929e">Sales from your connected POS decrement inventory in real time and trigger auto-reorder when a product drops below par.</p></div>
+    <label class="switch"><input type="checkbox" ${DB.integrations.pos?'checked':''} onchange="DB.integrations.pos=this.checked;save();go('sales')"><span class="track"><span class="knob"></span></span></label>
+  </div>
+  <div class="card"><table><thead><tr><th>Order #</th><th>Customer</th><th>Source</th><th>Date</th><th>Status</th><th class="right">Total</th></tr></thead><tbody>
+  ${DB.sales.map(s=>`<tr class="soRow">
+    <td><b style="color:var(--blue)">${s.id}</b></td><td>${s.customer}</td>
+    <td><span class="pill ${s.src==='POS'?'p-purple2':'p-gray'}" style="${s.src==='POS'?'background:#2a1533;color:#c084fc':''}">${s.src}</span></td>
+    <td>${s.date}</td><td><span class="pill ${s.status==='Fulfilled'?'p-green':s.status==='Started'?'p-blue':'p-amber'}">${s.status}</span></td>
+    <td class="right"><b>${money(s.total)}</b></td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function newSalesOrder(){
+  openModal(`<div class="modal">
+    <div class="modal-h"><h3>New sales order</h3><div class="x" onclick="closeModal()">×</div></div>
+    <div class="modal-b">
+      <div class="field"><label>Customer</label><input id="soCust" placeholder="Customer name"></div>
+      <div class="field"><label>Product</label><select id="soProd">${DB.products.map(p=>`<option value="${p.id}">${p.name} — ${p.qty} ${p.uom} on hand</option>`).join('')}</select></div>
+      <div class="grid2"><div class="field"><label>Quantity</label><input id="soQty" type="number" value="1"></div>
+      <div class="field"><label>Source</label><select id="soSrc"><option>Manual</option><option>POS</option><option>Web store</option></select></div></div>
+    </div>
+    <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="createSalesOrder()">Create &amp; fulfill</button></div>
+  </div>`);
+}
+function createSalesOrder(){
+  const cust=$('#soCust').value.trim()||'Walk-in customer';
+  const p=DB.products.find(x=>x.id===$('#soProd').value);const q=+$('#soQty').value;
+  const id='SO-'+String(DB.soSeq++).padStart(6,'0');
+  DB.sales.unshift({id,customer:cust,status:'Fulfilled',total:q*p.price,date:'Jul 6, 2026',src:$('#soSrc').value});
+  fulfillSale(p,q,id);closeModal();
+}
+function fulfillSale(p,q,id){
+  const before=p.qty;p.qty=Math.max(0,p.qty-q);
+  logAct(`${id} sold ${q}× ${p.name}`);
+  save();toast(`${id} fulfilled — ${q}× ${p.name} shipped`);
+  // auto reorder trigger
+  if(before>p.reorderPoint&&p.qty<=p.reorderPoint){
+    toast(`⚡ ${p.name} dropped below par — auto-reorder triggered`,true);
+    setTimeout(()=>runAutoReorder(p.vendorId,[p.id]),700);
+  }else{go(currentView);}
+  updateNavBadge();
+}
+function simulatePOS(){
+  if(!DB.integrations.pos)return toast('Turn on POS sync first',true);
+  // pick a random-ish product with stock
+  const candidates=DB.products.filter(p=>p.qty>0);
+  const p=candidates[Math.floor(Math.random()*candidates.length)];
+  const q=Math.min(p.qty,1+Math.floor(Math.random()*Math.max(1,Math.ceil(p.reorderPoint*.4))));
+  const id='SO-'+String(DB.soSeq++).padStart(6,'0');
+  DB.sales.unshift({id,customer:'POS Terminal #'+(1+Math.floor(Math.random()*3)),status:'Fulfilled',total:q*p.price,date:'Jul 6, 2026',src:'POS'});
+  fulfillSale(p,q,id);
+}
+
+/* ============ PURCHASE ORDERS ============ */
+function vPurchase(){
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="toolbar"><div class="search">${icon('search')}<input placeholder="Search POs" oninput="filterRows(this,'poRow')"></div>
+    <div style="flex:1"></div>
+    <button class="btn" onclick="go('reorder')">${icon('refresh')} Auto-Reorder</button>
+    <button class="btn pri" onclick="newPO()">${icon('plus')} New purchase order</button></div>
+  <div class="card"><table><thead><tr><th>Order #</th><th>Distributor</th><th>Items</th><th>Date</th><th>Status</th><th class="right">Total</th><th></th></tr></thead><tbody>
+  ${DB.pos.map(po=>`<tr class="poRow">
+    <td><b style="color:var(--amber)">${po.id}</b>${po.auto?' <span class="pill p-purple2" style="background:#2a1533;color:#c084fc">Auto</span>':''}</td>
+    <td>${vendorName(po.vendorId)}</td><td>${po.lines&&po.lines.length?po.lines.length+' lines':'—'}</td><td>${po.date}</td>
+    <td><span class="pill ${po.status==='Fulfilled'?'p-green':po.status==='Sent'?'p-blue':po.status==='Started'?'p-blue':'p-amber'}">${po.status}</span></td>
+    <td class="right"><b>${money(po.total)}</b></td>
+    <td class="right">${po.status!=='Fulfilled'?`<button class="btn sm pri" onclick="event.stopPropagation();receivePO('${po.id}')">Receive</button>`:'✓'}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function newPO(){
+  openModal(`<div class="modal">
+    <div class="modal-h"><h3>New purchase order</h3><div class="x" onclick="closeModal()">×</div></div>
+    <div class="modal-b">
+      <div class="field"><label>Distributor</label><select id="npoVendor">${DB.vendors.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Product</label><select id="npoProd">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Quantity</label><input id="npoQty" type="number" value="25"></div>
+    </div>
+    <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="createPO()">Create PO</button></div>
+  </div>`);
+}
+function createPO(){
+  const p=DB.products.find(x=>x.id===$('#npoProd').value);const q=+$('#npoQty').value;
+  const vid=$('#npoVendor').value;const v=DB.vendors.find(x=>x.id===vid);
+  const id='PO-'+String(DB.poSeq++).padStart(6,'0');
+  DB.pos.unshift({id,vendorId:vid,status:'Unfulfilled',total:q*p.cost,date:'Jul 6, 2026',lines:[{sku:p.sku,name:p.name,qty:q,cost:p.cost}],auto:false});
+  logAct(`Created ${id} → ${v.name}`);save();closeModal();toast(`${id} created`);go('purchase');
+}
+function receivePO(id){
+  const po=DB.pos.find(x=>x.id===id);
+  if(po.lines&&po.lines.length){po.lines.forEach(l=>{const p=DB.products.find(x=>x.sku===l.sku);if(p)p.qty+=l.qty;});}
+  po.status='Fulfilled';logAct(`Received ${id} — stock updated`);save();
+  toast(`${id} received — inventory replenished`);go('purchase');updateNavBadge();
+}
+
+/* ============ VENDORS ============ */
+function vVendors(){
+  const c=$('#content');
+  c.innerHTML=`<div class="toolbar"><div class="search">${icon('search')}<input placeholder="Search distributors" oninput="filterRows(this,'vRow')"></div><div style="flex:1"></div><button class="btn pri" onclick="toast('Vendor form — connect backend to persist')">${icon('plus')} New distributor</button></div>
+  <div class="int-grid">
+  ${DB.vendors.map(v=>{const prods=DB.products.filter(p=>p.vendorId===v.id);
+    return `<div class="int-card">
+    <div class="ih"><div class="il">${icon('truck')}</div><div style="flex:1"><h4>${v.name}</h4><div class="mini-note">${v.contact}</div></div>${v.api?'<span class="pill p-green">API</span>':'<span class="pill p-gray">Email</span>'}</div>
+    <div class="kv"><span>Products supplied</span><b>${prods.length}</b></div>
+    <div class="kv"><span>Payment terms</span><b>${v.terms}</b></div>
+    <div class="kv"><span>Lead time</span><b>${v.lead} days</b></div>
+    <div class="kv"><span>Outstanding balance</span><b>${money(v.balance)}</b></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" style="flex:1" onclick="vendorProducts('${v.id}')">View products</button><button class="btn sm pri" style="flex:1" onclick="reorderForVendor('${v.id}')">Reorder low items</button></div>
+  </div>`;}).join('')}</div>`;
+}
+function reorderForVendor(vid){
+  const low=lowProducts().filter(p=>p.vendorId===vid);
+  if(!low.length)return toast('No low-stock items for this distributor',true);
+  runAutoReorder(vid);
+}
+function vendorProducts(vid){
+  const v=DB.vendors.find(x=>x.id===vid);const prods=DB.products.filter(p=>p.vendorId===vid);
+  openModal(`<div class="modal wide"><div class="modal-h"><div class="il" style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center">${icon('truck')}</div><h3>${v.name} — products</h3><div class="x" onclick="closeModal()">×</div></div>
+  <div class="modal-b" style="padding:0"><table><thead><tr><th>Product</th><th>SKU</th><th>On hand</th><th>Par</th><th class="right">Vendor cost</th></tr></thead><tbody>
+  ${prods.map(p=>{const st=stockState(p);return `<tr><td><div class="prod-cell"><div class="thumb">${p.emoji}</div><b>${p.name}</b></div></td><td><small>${p.sku}</small></td><td><span class="pill ${st.cls}">${p.qty} ${p.uom}</span></td><td>${p.reorderPoint}</td><td class="right">${money(p.cost)}</td></tr>`;}).join('')}
+  </tbody></table></div>
+  <div class="modal-f"><button class="btn" onclick="closeModal()">Close</button><button class="btn warn" onclick="closeModal();reorderForVendor('${vid}')">Reorder low items</button></div></div>`);
+}
+
+/* ============ SCAN STATION ============ */
+let scanLog=[];
+function vScan(){
+  const c=$('#content');
+  c.innerHTML=`<div class="scanner">
+    <div class="scan-box"><div>${icon('scan')}</div><div style="font-weight:700;margin-top:10px;font-size:16px">Scan Station</div><div style="opacity:.7;font-size:13px">Connected to handheld & USB scanners</div></div>
+    <div class="tabs" style="margin:0 auto 16px"><button class="active" id="scanReceive" onclick="scanMode='receive';setScanTab()">Receive (+)</button><button id="scanPick" onclick="scanMode='pick';setScanTab()">Pick / Sell (−)</button><button id="scanCount" onclick="scanMode='count';setScanTab()">Count (=)</button></div>
+    <div class="scan-input"><input id="scanField" placeholder="Scan or type SKU / barcode…" autofocus><input id="scanQ" type="number" value="1" style="width:80px;flex:none;text-align:center;border:2px solid var(--line);border-radius:11px"><button class="btn pri" onclick="doScan()">Enter</button></div>
+    <div style="text-align:center;margin-bottom:14px"><span class="link" onclick="randomScan()">⚡ Simulate a scan</span></div>
+    <div class="scan-log" id="scanLog"></div>
+  </div>`;
+  $('#scanField').addEventListener('keydown',e=>{if(e.key==='Enter')doScan();});
+  renderScanLog();setTimeout(()=>$('#scanField')&&$('#scanField').focus(),100);
+}
+let scanMode='receive';
+function setScanTab(){['Receive','Pick','Count'].forEach(m=>{const b=$('#scan'+m);if(b)b.classList.toggle('active',scanMode===m.toLowerCase());});}
+function doScan(){
+  const code=$('#scanField').value.trim();if(!code)return;
+  const q=+$('#scanQ').value||1;
+  const p=DB.products.find(x=>x.sku===code||x.barcode===code||x.name.toLowerCase()===code.toLowerCase());
+  if(!p){scanLog.unshift({ok:false,code});renderScanLog();$('#scanField').value='';toast('No product matches '+code,true);return;}
+  const before=p.qty;
+  if(scanMode==='receive')p.qty+=q;
+  else if(scanMode==='pick')p.qty=Math.max(0,p.qty-q);
+  else p.qty=q;
+  scanLog.unshift({ok:true,p,mode:scanMode,q,before,after:p.qty});
+  logAct(`Scan (${scanMode}) ${q}× ${p.name}`);save();renderScanLog();
+  $('#scanField').value='';$('#scanField').focus();updateNavBadge();
+  if(scanMode==='pick'&&before>p.reorderPoint&&p.qty<=p.reorderPoint){
+    toast(`⚡ ${p.name} hit par — auto-reorder triggered`,true);setTimeout(()=>runAutoReorderSilent(p),600);
+  }
+}
+function runAutoReorderSilent(p){runAutoReorder(p.vendorId,[p.id]);go('scan');}
+function randomScan(){
+  const p=DB.products[Math.floor(Math.random()*DB.products.length)];
+  $('#scanField').value=p.barcode;$('#scanQ').value=1+Math.floor(Math.random()*5);doScan();
+}
+function renderScanLog(){
+  const el=$('#scanLog');if(!el)return;
+  el.innerHTML=scanLog.slice(0,12).map(s=>{
+    if(!s.ok)return `<div class="scan-item"><div class="si-ic" style="background:var(--red-soft);color:var(--red)">${icon('warn')}</div><div style="flex:1"><b>Unknown code</b><div class="mini-note">${s.code}</div></div></div>`;
+    const sign=s.mode==='receive'?'+':s.mode==='pick'?'−':'=';
+    const col=s.mode==='receive'?'var(--green)':s.mode==='pick'?'var(--amber)':'var(--blue)';
+    return `<div class="scan-item"><div class="si-ic" style="background:var(--blue-soft)">${s.p.emoji}</div><div style="flex:1"><b>${s.p.name}</b><div class="mini-note">${s.p.sku} · ${s.before} → ${s.after} ${s.p.uom}</div></div><b style="color:${col};font-size:16px">${sign}${s.q}</b></div>`;
+  }).join('')||'<div class="empty" style="padding:20px">Scans will appear here</div>';
+}
+
+/* ============ TRANSFERS / ADJUST / COUNTS ============ */
+function vTransfers(){
+  const c=$('#content');
+  c.innerHTML=`<div class="toolbar"><div style="flex:1"></div><button class="btn pri" onclick="newTransfer()">${icon('plus')} New transfer</button></div>
+  <div class="card"><table><thead><tr><th>Transfer #</th><th>From</th><th>To</th><th>Date</th><th>Status</th></tr></thead><tbody>
+  ${DB.transfers.map(t=>`<tr><td><b style="color:var(--blue)">${t.id}</b></td><td>${t.from}</td><td>${t.to}</td><td>${t.date}</td><td><span class="pill ${t.status==='In Transit'?'p-blue':'p-amber'}">${t.status}</span></td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function newTransfer(){
+  openModal(`<div class="modal"><div class="modal-h"><h3>New stock transfer</h3><div class="x" onclick="closeModal()">×</div></div>
+  <div class="modal-b"><div class="grid2"><div class="field"><label>From</label><select id="tFrom">${LOCS.map(l=>`<option>${l}</option>`).join('')}</select></div><div class="field"><label>To</label><select id="tTo">${LOCS.slice().reverse().map(l=>`<option>${l}</option>`).join('')}</select></div></div>
+  <div class="field"><label>Product</label><select id="tProd">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+  <div class="field"><label>Quantity</label><input id="tQty" type="number" value="10"></div></div>
+  <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="createTransfer()">Create transfer</button></div></div>`);
+}
+function createTransfer(){
+  const id='ST-'+String(13+DB.transfers.length).padStart(6,'0');
+  DB.transfers.unshift({id,from:$('#tFrom').value,to:$('#tTo').value,status:'Open',date:'Jul 6, 2026'});
+  logAct(`Created transfer ${id}`);save();closeModal();toast(`${id} created`);go('transfers');
+}
+function vAdjust(){
+  const c=$('#content');
+  c.innerHTML=`<div class="toolbar"><div style="flex:1"></div><button class="btn pri" onclick="newAdjust()">${icon('plus')} New adjustment</button></div>
+  <div class="card"><table><thead><tr><th>Adjustment #</th><th>Location</th><th>Reason</th><th>Qty change</th><th>Date</th></tr></thead><tbody>
+  ${DB.adjustments.map(a=>`<tr><td><b>${a.id}</b></td><td>${a.location}</td><td>${a.reason}</td><td><span class="pill ${a.qty<0?'p-red':'p-green'}">${a.qty>0?'+':''}${a.qty}</span></td><td>${a.date}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function newAdjust(){
+  openModal(`<div class="modal"><div class="modal-h"><h3>New stock adjustment</h3><div class="x" onclick="closeModal()">×</div></div>
+  <div class="modal-b"><div class="field"><label>Product</label><select id="aProd">${DB.products.map(p=>`<option value="${p.id}">${p.name} (${p.qty} ${p.uom})</option>`).join('')}</select></div>
+  <div class="grid2"><div class="field"><label>Reason</label><select id="aReason"><option>Spoilage / expired</option><option>Damaged</option><option>Theft/loss</option><option>Cycle count</option><option>Found stock</option><option>Correction</option></select></div>
+  <div class="field"><label>Quantity change (±)</label><input id="aQty" type="number" value="-1"></div></div></div>
+  <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" onclick="createAdjust()">Adjust stock</button></div></div>`);
+}
+function createAdjust(){
+  const p=DB.products.find(x=>x.id===$('#aProd').value);const q=+$('#aQty').value;const before=p.qty;
+  p.qty=Math.max(0,p.qty+q);
+  const id='SA-'+String(64+DB.adjustments.length).padStart(6,'0');
+  DB.adjustments.unshift({id,location:p.location,reason:$('#aReason').value,qty:q,date:'Jul 6, 2026'});
+  logAct(`${id}: ${q>0?'+':''}${q} ${p.name}`);save();closeModal();toast('Stock adjusted');
+  if(before>p.reorderPoint&&p.qty<=p.reorderPoint&&DB.integrations.distributor)setTimeout(()=>runAutoReorder(p.vendorId,[p.id]),600);
+  go('adjust');updateNavBadge();
+}
+function vCounts(){
+  const c=$('#content');
+  c.innerHTML=`<div class="toolbar"><div style="flex:1"></div><button class="btn pri" onclick="toast('Count sheet builder — pick categories to count')">${icon('plus')} New count</button></div>
+  <div class="card"><table><thead><tr><th>Count #</th><th>Location</th><th>Items</th><th>Status</th><th></th></tr></thead><tbody>
+  ${DB.counts.map(ct=>`<tr><td><b style="color:var(--blue)">${ct.id}</b></td><td>${ct.location}</td><td>${ct.items} products</td><td><span class="pill ${ct.status==='In progress'?'p-blue':'p-amber'}">${ct.status}</span></td><td class="right"><button class="btn sm">Prepare count</button></td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+/* ============ REPORTS ============ */
+function vReports(){
+  const c=$('#content');
+  const totalIn=DB.products.reduce((s,p)=>s+p.qty,0);
+  const val=DB.products.reduce((s,p)=>s+p.qty*p.cost,0);
+  const retail=DB.products.reduce((s,p)=>s+p.qty*p.price,0);
+  const byCat={};DB.products.forEach(p=>{byCat[p.category]=(byCat[p.category]||0)+p.qty*p.cost;});
+  const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const max=cats[0]?cats[0][1]:1;
+  c.innerHTML=`
+  <div class="stats">
+    <div class="stat"><div class="ic ic-blue">${icon('box')}</div><div class="v">${totalIn.toLocaleString()}</div><div class="l">Total units on hand</div></div>
+    <div class="stat"><div class="ic ic-green">${icon('dollar')}</div><div class="v">${money(val)}</div><div class="l">Inventory cost value</div></div>
+    <div class="stat"><div class="ic ic-purple">${icon('trend')}</div><div class="v">${money(retail)}</div><div class="l">Retail value</div></div>
+    <div class="stat"><div class="ic ic-amber">${icon('warn')}</div><div class="v">${lowProducts().length}</div><div class="l">Below par</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card"><div class="card-h"><h3>Inventory value by category</h3></div><div style="padding:16px 18px">
+    ${cats.map(([cat,v])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><b>${cat}</b><span>${money(v)}</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:linear-gradient(90deg,var(--blue),var(--blue2))"></div></div></div>`).join('')}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>Inventory movement summary</h3><div class="spacer"></div><button class="btn sm" onclick="toast('Exported movement report (demo)')">Export</button></div>
+    <table><thead><tr><th>Product</th><th class="right">On hand</th><th class="right">Reorder pt</th><th class="right">Value</th></tr></thead><tbody>
+    ${DB.products.slice().sort((a,b)=>b.qty*b.cost-a.qty*a.cost).slice(0,8).map(p=>`<tr><td><div class="prod-cell"><div class="thumb">${p.emoji}</div><b>${p.name}</b></div></td><td class="right">${p.qty}</td><td class="right">${p.reorderPoint}</td><td class="right"><b>${money(p.qty*p.cost)}</b></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+/* ============ INTEGRATIONS ============ */
+function vIntegrations(){
+  const items=[
+    {k:'pos',ic:'🛒',name:'POS System',desc:'Square / Clover / Shopify POS. Sales decrement stock live and trigger reorder.',tag:'Point of Sale'},
+    {k:'scanner',ic:'📟',name:'Barcode Scanners',desc:'Zebra & handheld USB/Bluetooth scanners for receiving, picking and counts.',tag:'Hardware'},
+    {k:'distributor',ic:'🚚',name:'Distributor Auto-Send',desc:'Transmit generated purchase orders directly to distributor ordering APIs / EDI.',tag:'Purchasing'},
+    {k:'shopify',ic:'🛍️',name:'Shopify Store',desc:'Sync product catalog & online orders. Two-way inventory sync.',tag:'eCommerce'},
+    {k:'quickbooks',ic:'📊',name:'QuickBooks',desc:'Push purchase orders, bills and inventory valuation to accounting.',tag:'Accounting'},
+    {k:'shipstation',ic:'📦',name:'ShipStation',desc:'Fulfillment & shipping labels for outbound sales orders.',tag:'Shipping'},
+  ];
+  const c=$('#content');
+  c.innerHTML=`<div class="int-grid">
+  ${items.map(i=>`<div class="int-card">
+    <div class="ih"><div class="il" style="font-size:24px">${i.ic}</div><div style="flex:1"><h4>${i.name}</h4><div class="mini-note">${i.tag}</div></div>
+      <label class="switch"><input type="checkbox" ${DB.integrations[i.k]?'checked':''} onchange="toggleInt('${i.k}',this.checked)"><span class="track"><span class="knob"></span></span></label></div>
+    <p>${i.desc}</p>
+    <div style="display:flex;align-items:center;gap:8px"><span class="pill ${DB.integrations[i.k]?'p-green':'p-gray'}" id="int-${i.k}">${DB.integrations[i.k]?'Connected':'Not connected'}</span>
+    <span class="link" style="margin-left:auto" onclick="toast('Opens configuration — wire to backend later')">Configure →</span></div>
+  </div>`).join('')}</div>`;
+}
+function toggleInt(k,v){DB.integrations[k]=v;save();const el=$('#int-'+k);if(el){el.textContent=v?'Connected':'Not connected';el.className='pill '+(v?'p-green':'p-gray');}toast((v?'Connected ':'Disconnected ')+k);}
+
+/* ============ UTIL ============ */
+function filterRows(input,cls){const q=input.value.toLowerCase();document.querySelectorAll('.'+cls).forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});}
+$('#quickAdd').addEventListener('click',()=>{({products:newProduct,sales:newSalesOrder,purchase:newPO,transfers:newTransfer,adjust:newAdjust}[currentView]||newProduct)();});
+$('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.toLowerCase();const p=DB.products.find(x=>(x.name+x.sku).toLowerCase().includes(q));if(p){go('products');setTimeout(()=>productDetail(p.id),150);}else toast('No match',true);}});
+
+/* HYDRATE STATIC ICONS */
+document.querySelectorAll('[data-ico]').forEach(el=>el.insertAdjacentHTML('afterbegin',icon(el.dataset.ico)));
+$('#toast').querySelector('.t-ic').innerHTML=icon('check');
+
+/* INIT */
+go('dashboard');updateNavBadge();
+</script>
+</body>
+</html>
