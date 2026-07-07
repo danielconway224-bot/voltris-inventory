@@ -184,6 +184,9 @@ tbody tr:last-child td{border-bottom:none}
 .mini-note{font-size:11px;color:var(--muted);margin-top:3px}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#cbd5e1;margin-right:5px;vertical-align:middle}
 .dot.on{background:#10b981}
+.chart-wrap{position:relative}
+.chart-tip{position:absolute;background:#0f172a;color:#fff;font-size:12px;padding:7px 10px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;transform:translate(-50%,-115%);box-shadow:0 6px 20px rgba(15,23,42,.25);z-index:5}
+.chart-tip b{display:block}
 .hidden{display:none!important}
 .link{color:var(--blue);font-weight:600;cursor:pointer}
 .sample-banner{background:#f8fafc;color:#64748b;text-align:center;padding:7px;font-size:12px;font-weight:500;border-bottom:1px solid var(--line)}
@@ -201,6 +204,7 @@ tbody tr:last-child td{border-bottom:none}
     <nav class="nav" id="nav">
       <div class="nav-label">Overview</div>
       <a data-view="dashboard" data-ico="grid" class="active"><span>Dashboard</span></a>
+      <a data-view="analytics" data-ico="trend"><span>Analytics</span></a>
       <a data-view="products" data-ico="box"><span>Products</span><span class="badge" id="nav-low">0</span></a>
       <a data-view="reorder" data-ico="refresh"><span>Auto-Reorder</span></a>
       <div class="nav-label">Sales &amp; Purchasing</div>
@@ -269,10 +273,13 @@ const CATS=['Produce','Dairy & Eggs','Meat & Seafood','Bakery','Frozen','Beverag
 const LOCS=['Main Store','Backroom','Cold Storage','Freezer','Distribution Center'];
 
 function seedVendors(){return[
-  {id:'V1',name:'Sysco Foods',contact:'Thelma R Coutu',email:'orders@sysco.com',phone:'111-222-3333',terms:'Net 30',lead:2,balance:13622.15,api:true},
-  {id:'V2',name:'US Foods',contact:'Raymond M Stang',email:'sales@usfoods.com',phone:'222-333-4455',terms:'Net 15',lead:3,balance:2140.00,api:true},
-  {id:'V3',name:'Fresh Valley Produce',contact:'Frederica Blunk',email:'ap@freshvalley.com',phone:'333-444-5566',terms:'Net 7',lead:1,balance:880.50,api:true},
-  {id:'V4',name:'Coastal Seafood Co.',contact:'Earleen Mai',email:'orders@coastalseafood.com',phone:'444-555-6677',terms:'Net 15',lead:2,balance:0,api:false},
+  {id:'V1',name:'Sysco',contact:'Marcus Bell',email:'orders@sysco.com',phone:'(281) 584-1390',terms:'Net 30',lead:2,balance:18420.75,api:true},
+  {id:'V2',name:'US Foods',contact:'Dana Whitfield',email:'orders@usfoods.com',phone:'(847) 720-8000',terms:'Net 15',lead:3,balance:7215.40,api:true},
+  {id:'V3',name:'FreshPoint',contact:'Elena Ruiz',email:'orders@freshpoint.com',phone:'(713) 896-3300',terms:'Net 7',lead:1,balance:2380.50,api:true},
+  {id:'V4',name:'Inland Seafood',contact:'Tom Nakagawa',email:'orders@inlandseafood.com',phone:'(404) 350-5850',terms:'Net 15',lead:2,balance:1140.00,api:false},
+  {id:'V5',name:'C&S Wholesale Grocers',contact:'Priya Shah',email:'orders@cswg.com',phone:'(603) 354-7000',terms:'Net 30',lead:4,balance:12655.10,api:true},
+  {id:'V6',name:'McLane Company',contact:'Jordan Pratt',email:'orders@mclaneco.com',phone:'(254) 771-7500',terms:'Net 21',lead:3,balance:4310.25,api:true},
+  {id:'V7',name:'UNFI',contact:'Sofia Marino',email:'orders@unfi.com',phone:'(401) 528-8634',terms:'Net 30',lead:5,balance:3899.80,api:false},
 ];}
 
 function seedProducts(){
@@ -293,7 +300,7 @@ function seedProducts(){
     ['Garlic - 3ct','PACK',1.99],['Fresh Ginger','LB',3.99],['White Mushrooms - 8oz','EA',2.49],['Portobello Caps - 6oz','EA',3.49],
     ['Green Onions - Bunch','EA',1.19],['Cilantro - Bunch','EA',0.99],['Parsley - Bunch','EA',1.29],['Asparagus','LB',3.99],
     ['Green Beans','LB',2.49],['Corn on the Cob - 4ct','PACK',3.49],['Jalapeno Peppers','LB',1.99]]],
-  ['Dairy & Eggs','V1',.58,[
+  ['Dairy & Eggs','V2',.58,[
     ['Whole Milk - 1 Gal','GAL',4.29],['2% Reduced Fat Milk - 1 Gal','GAL',4.19],['Skim Milk - 1 Gal','GAL',3.99],['Whole Milk - Half Gallon','EA',2.79],
     ['Chocolate Milk - Half Gallon','EA',3.29],['Oat Milk - 64oz','EA',4.99],['Almond Milk - 64oz','EA',3.99],['Soy Milk - 64oz','EA',3.79],
     ['Heavy Whipping Cream - Pint','EA',4.49],['Half & Half - Quart','EA',3.99],['Large Eggs - Dozen','DOZ',3.79],['Large Eggs - 18ct','PACK',5.49],
@@ -330,7 +337,7 @@ function seedProducts(){
     ['Frozen Pancakes - 12ct','BOX',3.49],['Frozen Breakfast Burritos - 8ct','BOX',6.99],['Frozen Lasagna - Family Size','EA',9.99],
     ['Frozen Chicken Pot Pies - 2ct','BOX',4.99],['Frozen Strawberries - 16oz','BAG',3.49],['Frozen Blueberries - 16oz','BAG',3.99],
     ['Frozen Mango Chunks - 16oz','BAG',3.79],['Frozen Garlic Bread - 16oz','EA',3.29]]],
-  ['Beverages','V2',.58,[
+  ['Beverages','V6',.58,[
     ['Orange Juice - 64oz','EA',4.99],['Apple Juice - 64oz','EA',3.49],['Cranberry Juice - 64oz','EA',3.99],['Grape Juice - 64oz','EA',3.79],
     ['Lemonade - 64oz','EA',2.99],['Fruit Punch - 1 Gal','GAL',3.49],['Ground Coffee - 12oz','EA',8.99],['Whole Bean Coffee - 12oz','EA',9.99],
     ['Decaf Ground Coffee - 12oz','EA',8.99],['Coffee Pods - 24ct','BOX',14.99],['Black Tea Bags - 100ct','BOX',4.99],['Green Tea Bags - 40ct','BOX',3.99],
@@ -338,7 +345,7 @@ function seedProducts(){
     ['Ginger Ale - 12 Pack','PACK',6.49],['Sparkling Water - 12 Pack','PACK',5.49],['Spring Water - 24 Pack','PACK',4.99],['Distilled Water - 1 Gal','GAL',1.49],
     ['Sports Drink - 8 Pack','PACK',7.99],['Energy Drink - 4 Pack','PACK',8.99],['Iced Tea - 1 Gal','GAL',2.99],['Coconut Water - 33oz','EA',4.49],
     ['Hot Cocoa Mix - 10ct','BOX',3.49],['Cold Brew Concentrate - 32oz','EA',9.99]]],
-  ['Pantry','V2',.52,[
+  ['Pantry','V5',.52,[
     ['Corn Flakes Cereal','BOX',3.49],['Honey Nut O\'s Cereal','BOX',4.29],['Raisin Bran Cereal','BOX',4.49],['Instant Oatmeal Packets - 10ct','BOX',3.99],
     ['Old Fashioned Oats - 42oz','EA',5.49],['Granola - 12oz','BAG',4.99],['Spaghetti Pasta - 1lb','EA',1.29],['Penne Pasta - 1lb','EA',1.29],
     ['Rotini Pasta - 1lb','EA',1.29],['Elbow Macaroni - 1lb','EA',1.29],['Lasagna Noodles - 16oz','BOX',2.49],['Egg Noodles - 12oz','BAG',2.29],
@@ -358,7 +365,7 @@ function seedProducts(){
     ['Garlic Powder - 5oz','EA',2.99],['Onion Powder - 5oz','EA',2.79],['Chili Powder - 4oz','EA',2.99],['Ground Cinnamon - 4oz','EA',2.99],
     ['Taco Seasoning - 1oz','EA',0.79],['Mac & Cheese Dinner','BOX',1.29],['Instant Mashed Potatoes - 13oz','BOX',2.49],['Stuffing Mix - 6oz','BOX',1.99],
     ['Brownie Mix - 18oz','BOX',2.29],['Yellow Cake Mix - 15oz','BOX',1.99],['Chocolate Chips - 12oz','BAG',3.49]]],
-  ['Snacks','V2',.5,[
+  ['Snacks','V6',.5,[
     ['Potato Chips - Family Size','BAG',4.29],['BBQ Potato Chips','BAG',4.29],['Sour Cream & Onion Chips','BAG',4.29],['Tortilla Chips - 13oz','BAG',3.99],
     ['Nacho Cheese Chips','BAG',4.49],['Corn Chips - 9.25oz','BAG',3.79],['Pretzels - 16oz','BAG',3.29],['Cheese Puffs - 8.5oz','BAG',3.99],
     ['Microwave Popcorn - 6ct','BOX',4.49],['Popcorn Kernels - 32oz','BAG',3.49],['Saltine Crackers - 16oz','BOX',2.99],['Butter Crackers - 13.7oz','BOX',3.49],
@@ -367,7 +374,7 @@ function seedProducts(){
     ['Roasted Almonds - 16oz','BAG',7.99],['Cashews - 16oz','EA',9.49],['Roasted Peanuts - 16oz','EA',3.99],['Sunflower Seeds - 5.25oz','BAG',1.99],
     ['Beef Jerky - 10oz','BAG',11.99],['Sandwich Cookies - 20ct','PACK',3.99],['Vanilla Wafers - 11oz','BOX',3.29],['Milk Chocolate Bars - 6pk','PACK',5.99],
     ['Gummy Bears - 12oz','BAG',2.99],['Hard Candy Mix - 14oz','BAG',3.49]]],
-  ['Household','V2',.58,[
+  ['Household','V7',.58,[
     ['Paper Towels - 6 Roll','PACK',9.99],['Toilet Paper - 12 Roll','PACK',11.99],['Facial Tissues - 3pk','PACK',5.49],['Napkins - 250ct','PACK',3.99],
     ['Paper Plates - 100ct','PACK',6.99],['Plastic Cups - 50ct','PACK',4.49],['Plastic Utensils - 48ct','PACK',3.49],['Aluminum Foil - 75ft','EA',4.99],
     ['Plastic Wrap - 100ft','EA',3.49],['Parchment Paper - 45ft','EA',3.99],['Sandwich Bags - 100ct','BOX',3.29],['Freezer Bags Gallon - 30ct','BOX',4.49],
@@ -417,7 +424,7 @@ function seedPOs(){return[
 /* ============ STATE ============ */
 let DB=load();
 function load(){
-  try{const s=JSON.parse(localStorage.getItem('voltris_v3'));if(s&&s.products)return s;}catch(e){}
+  try{const s=JSON.parse(localStorage.getItem('voltris_v4'));if(s&&s.products)return s;}catch(e){}
   return{products:seedProducts(),vendors:seedVendors(),sales:seedSales(),pos:seedPOs(),
     transfers:[{id:'ST-000012',from:'Distribution Center',to:'Main Store',status:'Open',date:'Jul 6, 2026'},
                {id:'ST-000010',from:'Backroom',to:'Cold Storage',status:'In Transit',date:'Jul 5, 2026'}],
@@ -427,12 +434,13 @@ function load(){
     integrations:{pos:true,scanner:true,distributor:true,shopify:false,quickbooks:false,shipstation:false},
     poSeq:23,soSeq:23,activity:[]};
 }
-function save(){localStorage.setItem('voltris_v3',JSON.stringify(DB));}
+function save(){localStorage.setItem('voltris_v4',JSON.stringify(DB));}
 function logAct(t){DB.activity.unshift({t,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});DB.activity=DB.activity.slice(0,30);}
 
 /* ============ HELPERS ============ */
 const $=s=>document.querySelector(s);
 const money=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const money0=n=>'$'+Math.round(Number(n)).toLocaleString('en-US');
 const vendorName=id=>{const v=DB.vendors.find(x=>x.id===id);return v?v.name:'—';};
 const initials=n=>String(n||'').replace(/[^A-Za-z0-9 ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'PR';
 function stockState(p){
@@ -448,7 +456,9 @@ function closeModal(){$('#overlay').classList.remove('show');$('#modalHost').inn
 $('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
 
 /* ============ ROUTER ============ */
-const TITLES={dashboard:['Dashboard','Live overview of your inventory'],products:['Products','Track stock, par levels & reorder points'],
+const TITLES={dashboard:['Dashboard','Live overview of your inventory'],
+ analytics:['Revenue & Margins','Sales, gross profit & margin — trailing 30 days'],
+ products:['Products','Track stock, par levels & reorder points'],
  reorder:['Auto-Reorder','Automatic purchasing when stock runs low'],sales:['Sales Orders','Orders from manual entry, POS & channels'],
  purchase:['Purchase Orders','Orders sent to your distributors'],vendors:['Vendors','Distributors & suppliers'],
  scan:['Scan Station','Barcode receiving, picking & counting'],transfers:['Stock Transfers','Move inventory between locations'],
@@ -459,7 +469,7 @@ function go(view){
   currentView=view;
   document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===view));
   const t=TITLES[view]||['',''];$('#page-title').textContent=t[0];$('#page-sub').textContent=t[1];
-  ({dashboard:vDashboard,products:vProducts,reorder:vReorder,sales:vSales,purchase:vPurchase,vendors:vVendors,
+  ({dashboard:vDashboard,analytics:vAnalytics,products:vProducts,reorder:vReorder,sales:vSales,purchase:vPurchase,vendors:vVendors,
     scan:vScan,transfers:vTransfers,adjust:vAdjust,counts:vCounts,reports:vReports,integrations:vIntegrations}[view])();
   updateNavBadge();
 }
@@ -933,6 +943,104 @@ function vCounts(){
   <div class="card"><table><thead><tr><th>Count #</th><th>Location</th><th>Items</th><th>Status</th><th></th></tr></thead><tbody>
   ${DB.counts.map(ct=>`<tr><td><b style="color:var(--blue)">${ct.id}</b></td><td>${ct.location}</td><td>${ct.items} products</td><td><span class="pill ${ct.status==='In progress'?'p-blue':'p-amber'}">${ct.status}</span></td><td class="right"><button class="btn sm">Prepare count</button></td></tr>`).join('')}
   </tbody></table></div>`;
+}
+
+/* ============ ANALYTICS ============ */
+function salesModel(){
+  // deterministic per-product weekly sales velocity (cheaper items turn faster)
+  return DB.products.map((p,i)=>{
+    const h=Math.imul(i+11,1597334677)>>>0;
+    const base=6+(h%18);
+    const units=Math.max(2,Math.round(base*(p.price<2?2.2:p.price<5?1.4:p.price<10?.9:.45)));
+    return {p,units,rev:units*p.price,cogs:units*p.cost};
+  });
+}
+function vAnalytics(){
+  const rows=salesModel();
+  const wkRev=rows.reduce((s,r)=>s+r.rev,0),wkCogs=rows.reduce((s,r)=>s+r.cogs,0);
+  const rev30=wkRev*30/7,cogs30=wkCogs*30/7,gp30=rev30-cogs30,marginPct=gp30/rev30*100;
+  // daily series — 30 days ending Jul 6, 2026, weekend-weighted grocery pattern
+  const WF=[1.22,.82,.86,.9,.97,1.08,1.15];
+  const days=[];
+  for(let d=0;d<30;d++){
+    const dt=new Date(2026,5,7+d);
+    const h=Math.imul(d+3,2246822519)>>>0;
+    days.push({dt,rev:(rev30/30)*WF[dt.getDay()]*(0.92+(h%17)/100)});
+  }
+  const tot=days.reduce((s,x)=>s+x.rev,0);days.forEach(x=>x.rev*=rev30/tot);
+  // category rollup
+  const byCat={};
+  rows.forEach(r=>{const c=byCat[r.p.category]=byCat[r.p.category]||{rev:0,cogs:0};c.rev+=r.rev*30/7;c.cogs+=r.cogs*30/7;});
+  const cats=Object.entries(byCat).map(([c,v])=>({c,rev:v.rev,gp:v.rev-v.cogs,m:(v.rev-v.cogs)/v.rev*100})).sort((a,b)=>b.rev-a.rev);
+  const top=rows.slice().sort((a,b)=>b.rev-a.rev).slice(0,10);
+  const c=$('#content');
+  c.innerHTML=`
+  <div class="stats">
+    <div class="stat"><div class="ic ic-blue">${icon('dollar')}</div><div class="v">${money0(rev30)}</div><div class="l">Revenue — last 30 days</div><div class="d" style="color:var(--green)">+6.4% vs prior 30 days</div></div>
+    <div class="stat"><div class="ic ic-green">${icon('trend')}</div><div class="v">${money0(gp30)}</div><div class="l">Gross profit — last 30 days</div><div class="d" style="color:var(--green)">+5.1% vs prior 30 days</div></div>
+    <div class="stat"><div class="ic ic-purple">${icon('chart')}</div><div class="v">${marginPct.toFixed(1)}%</div><div class="l">Blended gross margin</div><div class="d" style="color:var(--muted)">COGS ${money0(cogs30)}</div></div>
+    <div class="stat"><div class="ic ic-amber">${icon('cart')}</div><div class="v">${money0(rev30/30)}</div><div class="l">Avg daily revenue</div><div class="d" style="color:var(--muted)">Sundays run ~22% above avg</div></div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-h"><h3>Daily revenue</h3><div class="spacer"></div><span class="mini-note" style="margin:0">Jun 7 – Jul 6, 2026</span></div>
+    <div class="chart-wrap" style="padding:18px 18px 12px" id="revChart"></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-h"><h3>Revenue &amp; margin by category</h3></div>
+      <table><thead><tr><th>Category</th><th class="right">Revenue (30d)</th><th class="right">Gross profit</th><th>Margin</th></tr></thead><tbody>
+      ${cats.map(x=>`<tr><td><b>${x.c}</b></td><td class="right">${money0(x.rev)}</td><td class="right">${money0(x.gp)}</td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="bar-track" style="width:84px;flex:none"><div class="bar-fill" style="width:${Math.min(100,x.m/60*100)}%;background:var(--blue)"></div></div><b style="font-size:12px">${x.m.toFixed(1)}%</b></div></td></tr>`).join('')}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Top products by revenue</h3><div class="spacer"></div><span class="mini-note" style="margin:0">est. 30-day</span></div>
+      <table><thead><tr><th>Product</th><th class="right">Units / wk</th><th class="right">Revenue (30d)</th><th class="right">Margin</th></tr></thead><tbody>
+      ${top.map(r=>`<tr onclick="productDetail('${r.p.id}')" style="cursor:pointer">
+        <td><div class="prod-cell"><div class="thumb">${initials(r.p.name)}</div><div><b>${r.p.name}</b><small>${r.p.category}</small></div></div></td>
+        <td class="right">${r.units}</td><td class="right"><b>${money0(r.rev*30/7)}</b></td>
+        <td class="right">${((r.p.price-r.p.cost)/r.p.price*100).toFixed(0)}%</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>`;
+  renderRevChart(days);
+}
+function renderRevChart(days){
+  const W=760,H=230,L=48,R=14,T=14,B=30;
+  const max=Math.max(...days.map(d=>d.rev))*1.15;
+  const x=i=>L+(W-L-R)*i/(days.length-1);
+  const y=v=>T+(H-T-B)*(1-v/max);
+  const pts=days.map((d,i)=>[x(i),y(d.rev)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('');
+  const area=line+`L${x(days.length-1).toFixed(1)} ${H-B}L${L} ${H-B}Z`;
+  let grid='',ylab='',xlab='';
+  for(let g=0;g<=4;g++){const v=max*g/4,yy=y(v);
+    grid+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="#eef1f5"/>`;
+    ylab+=`<text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="#94a3b8">$${(v/1000).toFixed(1)}k</text>`;}
+  days.forEach((d,i)=>{if(i%5===0||i===days.length-1)xlab+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${d.dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</text>`;});
+  const last=pts[pts.length-1];
+  $('#revChart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block" id="revSvg">
+    ${grid}${ylab}${xlab}
+    <path d="${area}" fill="rgba(225,29,72,.07)"/>
+    <path d="${line}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <line id="chx" y1="${T}" y2="${H-B}" stroke="#cbd5e1" opacity="0"/>
+    <circle id="chdot" r="4.5" fill="var(--blue)" stroke="#fff" stroke-width="2" opacity="0"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="var(--blue)" stroke="#fff" stroke-width="1.5"/>
+    <text x="${last[0]-8}" y="${last[1]-10}" text-anchor="end" font-size="11" font-weight="700" fill="#0f172a">${money0(days[days.length-1].rev)}</text>
+  </svg><div class="chart-tip" id="chtip"></div>`;
+  const svg=$('#revSvg'),tip=$('#chtip'),chx=$('#chx'),dot=$('#chdot');
+  svg.addEventListener('mousemove',e=>{
+    const r=svg.getBoundingClientRect();
+    const mx=(e.clientX-r.left)*W/r.width;
+    let i=Math.round((mx-L)/((W-L-R)/(days.length-1)));i=Math.max(0,Math.min(days.length-1,i));
+    const px=x(i),py=y(days[i].rev);
+    chx.setAttribute('x1',px);chx.setAttribute('x2',px);chx.setAttribute('opacity',1);
+    dot.setAttribute('cx',px);dot.setAttribute('cy',py);dot.setAttribute('opacity',1);
+    tip.style.left=(18+px*r.width/W)+'px';tip.style.top=(18+py*r.height/H)+'px';
+    tip.innerHTML=`<b>${days[i].dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</b>${money0(days[i].rev)} revenue`;
+    tip.style.opacity=1;
+  });
+  svg.addEventListener('mouseleave',()=>{tip.style.opacity=0;chx.setAttribute('opacity',0);dot.setAttribute('opacity',0);});
 }
 
 /* ============ REPORTS ============ */
